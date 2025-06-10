@@ -1,27 +1,36 @@
 FROM node:20.11.1-bullseye
-
+ 
 WORKDIR /app
-
-# Installer les outils de compilation pour les dépendances natives
+ 
+# Install build tools
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
     && rm -rf /var/lib/apt/lists/*
-
-# Copier les fichiers de dépendances
+ 
+# Copy dependency files first
 COPY package.json yarn.lock ./
-
-# Installer les dépendances et reconstruire bcrypt
-RUN yarn install --frozen-lockfile
+ 
+# Install all dependencies (including devDependencies for building)
+RUN yarn install --frozen-lockfile --production=false
+ 
+# Rebuild native dependencies
 RUN npm rebuild bcrypt --update-binary
-
-# Copier le reste du code
+ 
+# Copy application code
 COPY . .
-
-# Construire l'application
+ 
+# Install missing type definitions
+RUN yarn add --dev @types/pdf-parse
+ 
+# Build TypeScript to JavaScript
 RUN yarn build
-
+ 
+# Remove devDependencies after build
+RUN yarn install --production
+ 
 EXPOSE 5001
-
-CMD ["yarn", "start"]
+ 
+# Run the compiled JavaScript
+CMD ["node", "dist/index.js"]
