@@ -1,20 +1,26 @@
-# Étape 1 : utiliser une image officielle Node.js
-FROM node:20-slim
+FROM node:20.11.1-bullseye
 
-# Étape 2 : définir le dossier de travail dans le conteneur
 WORKDIR /app
 
-# Étape 3 : copier les fichiers nécessaires
-COPY package*.json ./
+# Installer les outils de compilation pour les dépendances natives
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# Étape 4 : installer les dépendances
-RUN npm install
+# Copier les fichiers de dépendances
+COPY package.json yarn.lock ./
 
-# Étape 5 : copier le reste du code
+# Installer les dépendances
+RUN yarn install --frozen-lockfile
+
+# Reconstruire les dépendances natives si nécessaire
+RUN npm rebuild bcrypt --update-binary
+
+# Copier le reste du code
 COPY . .
 
-# Étape 6 : exposer le port utilisé par Express
 EXPOSE 5001
 
-# Étape 7 : démarrer l'application
-CMD ["node", "index.js"]
+CMD ["yarn", "start"]
