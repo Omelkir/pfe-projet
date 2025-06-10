@@ -1,5 +1,5 @@
 version: '3.8'
-
+ 
 services:
   mediconnect:
     container_name: PFEMediConnect
@@ -14,17 +14,17 @@ services:
       - ia
     networks:
       - mediconnect-network
-
+ 
   ia:
     container_name: AIService
     build:
       context: ./extract-text
       dockerfile: Dockerfile
     expose:
-      - "5001"
+      - "5001:5001"
     networks:
       - mediconnect-network
-
+ 
 networks:
   mediconnect-network:
     driver: bridge
