@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es2016",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true
+  },
+  "include": [
+    "src/**/*.ts" // This is a good default to include all .ts files in src
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
