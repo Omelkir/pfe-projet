@@ -1,12 +1,30 @@
 version: '3.8'
 
 services:
-  newsletter:
-    container_name: MediConnect
+  mediconnect:
+    container_name: PFEMediConnect
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3100:3100"  
+      - "3100:3100"
     environment:
       - NODE_ENV=production
+    depends_on:
+      - ia
+    networks:
+      - mediconnect-network
+
+  ia:
+    container_name: AIService
+    build:
+      context: ./extract-text
+      dockerfile: Dockerfile
+    expose:
+      - "5001"
+    networks:
+      - mediconnect-network
+
+networks:
+  mediconnect-network:
+    driver: bridge
