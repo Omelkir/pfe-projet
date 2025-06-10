@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  newsletter:
+    container_name: MediConnect
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3100:3100"  
+    environment:
+      - NODE_ENV=production

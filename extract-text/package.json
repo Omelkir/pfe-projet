@@ -1,0 +1,15 @@
+{
+  "name": "pdf-extractor-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "formidable": "^3.5.4",
+    "pdf-parse": "^1.1.1"
+  }
+}
