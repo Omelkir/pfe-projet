@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     echo '🔨 Copying environment files...'
-                    sh 'cp /home/.config/MediConnect/.env .'
+                    sh 'cp /home/.config/PFEMediConnect/.env .'
                     echo '🐳 Building image...'
                     sh 'docker compose down'
                     sh 'docker compose build --no-cache' // Force a fresh build
@@ -56,10 +56,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline succeeded! Backend and frontend are running.'
+            echo '✅ Pipeline succeeded!'
         }
         failure {
-            echo '❌ Pipeline failed. Check the logs for errors.'
+            echo '❌ Pipeline failed.'
         }
     }
 }
