@@ -208,7 +208,7 @@ const Chatbot: React.FC = () => {
     formData.append('file', file)
 
     try {
-      const response = await fetch('http://localhost:4000/extract', {
+      const response = await fetch('http://ia:5001/extract', {
         method: 'POST',
         body: formData
       })
