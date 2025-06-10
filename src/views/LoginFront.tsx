@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 
-// Next Imports
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -14,17 +13,20 @@ import InputAdornment from '@mui/material/InputAdornment'
 
 import Button from '@mui/material/Button'
 
-// Type Imports
 import { Box } from '@mui/material'
 
 import { IconExclamationCircle } from '@tabler/icons-react'
 
-// Component Imports
 import Logo from '@components/layout/shared/Logo'
 
 import { getStorageData, setStorageData } from '@/utils/helpersFront'
 
 const LoginFront = () => {
+  const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
+
+  const passwordCheck = (password: any) =>
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
+
   const router = useRouter()
 
   const isLogged: any =
@@ -42,14 +44,39 @@ const LoginFront = () => {
 
   const [controls, setControls] = useState<any>({
     email: false,
-    mdp: false
+    emailValid: false,
+    mdp: false,
+    mdpValid: false
   })
+
+  const clearForm = () => {
+    setData({
+      email: '',
+      mdp: ''
+    })
+    setControls({
+      email: false,
+      mdp: false
+    })
+  }
 
   async function handleSave() {
     try {
-      // setControls((prev: any) => ({ ...prev, email: data.email?.trim() === '' }));
-      // setControls((prev: any) => ({ ...prev, mdp: data.mdp?.trim() === '' }));
       const url = `${window.location.origin}/api/login/auth`
+
+      const newControls = {
+        email: data.email.trim() === '',
+        mdp: data.mdp.trim() === '',
+        emailValid: mailCheck(data.email.trim()),
+        mdpValid: passwordCheck(data.mdp.trim())
+      }
+
+      setControls(newControls)
+
+      if (Object.values(newControls).some(value => value)) {
+        return
+      }
+
       const requestBody = JSON.stringify({ email: data.email, mdp: data.mdp })
 
       const requestOptions = {
@@ -66,6 +93,7 @@ const LoginFront = () => {
         setStorageData('typeOfLogger', result.role)
         setStorageData('user', result.user)
         router.push('/front_page')
+        clearForm()
       } else {
         setTypeOfLogger(0)
       }
@@ -108,18 +136,24 @@ const LoginFront = () => {
 
           <div>
             <TextField
-              value={data.email}
               fullWidth
-              className={`${controls?.email === true ? 'isReq' : ''}`}
               label='Email'
-              type='email'
-              autoFocus
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
+                sx: {
+                  fontSize: '0.875rem', // mobile: 12px
+                  '@media (min-width:768px)': {
+                    fontSize: '1rem' // md+: 16px
+                  }
+                }
               }}
               InputProps={{
                 sx: {
-                  height: 60,
+                  height: 48, // mobile default
+                  fontSize: '0.875rem', // 14px
+                  '@media (min-width:768px)': {
+                    height: 60, // md and up
+                    fontSize: '1rem' // 16px
+                  },
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -127,53 +161,52 @@ const LoginFront = () => {
                   }
                 }
               }}
+              value={data?.email ?? ''}
+              className={`${controls?.email === true || controls.emailValid === true ? 'isReq' : ''}`}
               onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, email: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    email: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, email: false })
-                  setData((prev: any) => ({
-                    ...prev,
-                    email: e.target.value
-                  }))
-                }
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = mailCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, email: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  email: isEmpty,
+                  emailValid: !isEmpty && isInvalid
+                }))
               }}
             />
-            {controls.email === true ? <span className='errmsg'>Please enter the email !</span> : null}
+            {controls?.email === true ? (
+              <span className='errmsg'>Veuillez saisir l’email !</span>
+            ) : controls.emailValid === true ? (
+              <span className='errmsg'>
+                Email invalide : il doit contenir @ et se terminer par un domaine valide (ex: .com, .net)
+              </span>
+            ) : null}
           </div>
           <div>
             <TextField
               fullWidth
-              value={data.mdp}
-              className={`${controls?.mdp === true ? 'isReq' : ''}`}
+              value={data?.mdp ?? ''}
               label='Mot de passe'
-              id='outlined-adornment-password'
               type={isPasswordShown ? 'text' : 'password'}
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
-              }}
-              onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, mdp: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    mdp: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, mdp: false })
-                  setData((prev: any) => ({
-                    ...prev,
-                    mdp: e.target.value
-                  }))
+                sx: {
+                  fontSize: '0.875rem', // mobile: 12px
+                  '@media (min-width:768px)': {
+                    fontSize: '1rem' // md+: 16px
+                  }
                 }
               }}
+              className={`${controls?.mdp === true || controls.mdpValid === true ? 'isReq' : ''}`}
               InputProps={{
                 sx: {
-                  height: 60,
+                  height: 48,
+                  fontSize: '0.875rem',
+                  '@media (min-width:768px)': {
+                    height: 60,
+                    fontSize: '1rem'
+                  },
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -189,13 +222,36 @@ const LoginFront = () => {
                       onClick={handleClickShowPassword}
                       onMouseDown={e => e.preventDefault()}
                     >
-                      <i className={isPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                      <i
+                        className={
+                          isPasswordShown ? 'ri-eye-off-line text-xl md:text-2xl' : 'ri-eye-line text-xl md:text-2xl'
+                        }
+                      />
                     </IconButton>
                   </InputAdornment>
                 )
               }}
+              onChange={(e: any) => {
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = passwordCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, mdp: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  mdp: isEmpty,
+                  mdpValid: !isEmpty && isInvalid
+                }))
+              }}
             />
-            {controls?.mdp === true ? <span className='errmsg'>Please enter the password !</span> : null}
+            {controls?.mdp === true ? (
+              <span className='errmsg'>Veuillez saisir le mot de passe !</span>
+            ) : controls.mdpValid === true ? (
+              <span className='errmsg'>
+                Mot de passe invalide : il doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre
+                et un caractère spécial (ex: @, $, !).
+              </span>
+            ) : null}
           </div>
           <Button
             fullWidth

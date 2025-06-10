@@ -17,8 +17,6 @@ import { FormControl, Input, InputLabel, MenuItem, Select, Grid } from '@mui/mat
 import Logo from '@components/layout/shared/Logo'
 
 const Register = () => {
-  // States
-  // Fonction de validation de l'email
   const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
 
   const passwordCheck = (password: any) =>
@@ -300,9 +298,9 @@ const Register = () => {
             <Grid item xs={10} md={10}>
               {' '}
               <FormControl fullWidth>
-                <InputLabel>Type</InputLabel>
+                <InputLabel>Role</InputLabel>
                 <Select
-                  label='Type'
+                  label='Role'
                   className={`h-12 md:h-[60px] ${controls?.role === true ? 'isReq' : ''}`}
                   value={data?.role || null}
                   onChange={(e: any) => {
@@ -647,20 +645,16 @@ const Register = () => {
                 value={data?.email ?? ''}
                 className={`${controls?.email === true || controls.emailValid === true ? 'isReq' : ''}`}
                 onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, email: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      email: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, email: false })
-                    setControls({ ...controls, emailValid: mailCheck(e.target.value.trim()) })
-                    setData((prev: any) => ({
-                      ...prev,
-                      email: e.target.value
-                    }))
-                  }
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = mailCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, email: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    email: isEmpty,
+                    emailValid: !isEmpty && isInvalid
+                  }))
                 }}
               />
               {controls?.email === true ? (
@@ -878,7 +872,7 @@ const Register = () => {
                     }
                   }
                 }}
-                className={`${controls?.mdp === true ? 'isReq' : ''}`}
+                className={`${controls?.mdp === true || controls.mdpValid === true ? 'isReq' : ''}`}
                 InputProps={{
                   sx: {
                     height: 48,
@@ -912,20 +906,16 @@ const Register = () => {
                   )
                 }}
                 onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, mdp: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      mdp: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, mdp: false })
-                    setControls({ ...controls, mdpValid: passwordCheck(e.target.value.trim()) })
-                    setData((prev: any) => ({
-                      ...prev,
-                      mdp: e.target.value
-                    }))
-                  }
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = passwordCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, mdp: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    mdp: isEmpty,
+                    mdpValid: !isEmpty && isInvalid
+                  }))
                 }}
               />
               {controls?.mdp === true ? (
@@ -985,20 +975,16 @@ const Register = () => {
                   )
                 }}
                 onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, conMdp: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      conMdp: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, conMdp: false })
-                    setControls({ ...controls, conMdpValid: passwordCheck(e.target.value.trim()) })
-                    setData((prev: any) => ({
-                      ...prev,
-                      conMdp: e.target.value
-                    }))
-                  }
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = passwordCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, conMdp: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    conMdp: isEmpty,
+                    conMdpValid: !isEmpty && isInvalid
+                  }))
                 }}
               />
               {controls?.conMdp === true ? (

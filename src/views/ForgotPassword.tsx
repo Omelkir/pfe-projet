@@ -133,7 +133,6 @@ const ForgotPassword = () => {
             value={data?.email || null}
             fullWidth
             label='Email'
-            autoFocus
             InputLabelProps={{ sx: { fontSize: '1rem' } }}
             InputProps={{
               sx: { height: 60 }
