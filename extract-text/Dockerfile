@@ -12,14 +12,15 @@ RUN apt-get update && apt-get install -y \
 # Copier les fichiers de dépendances
 COPY package.json yarn.lock ./
 
-# Installer les dépendances
+# Installer les dépendances et reconstruire bcrypt
 RUN yarn install --frozen-lockfile
-
-# Reconstruire les dépendances natives si nécessaire
 RUN npm rebuild bcrypt --update-binary
 
 # Copier le reste du code
 COPY . .
+
+# Construire l'application
+RUN yarn build
 
 EXPOSE 5001
 
