@@ -6,7 +6,8 @@
     "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts" // This is a good default to include all .ts files in src
