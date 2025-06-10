@@ -4,10 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "node dist/index.js",
     "build": "tsc",
-    "serve": "node dist/index.js",
-    "dev": "nodemon src/index.ts"
+    "serve": "PORT=5001  node dist/index.js",
+    "dev": "PORT=5001 nodemon src/index.ts"
   },
   "dependencies": {
     "@types/cors": "^2.8.19",
