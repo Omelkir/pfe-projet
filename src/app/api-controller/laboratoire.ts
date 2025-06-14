@@ -76,8 +76,8 @@ export const ajouter = async (req: any) => {
 
     const hashedPassword = await bcrypt.hash(motDePasse, 10)
 
-    const sql = `INSERT INTO medi_connect.laboratoire (nom_ut, email, mdp,role,image,id_ville,heurD,heurF,id_ser,info,isApproved) 
-                       VALUES ('${json.nom_ut}', '${json.email}', '${hashedPassword}',3, '${req.checkUrl}', '${json.id_ville}', '${json.heurD}','${json.heurF}', '${json.id_ser}', '${json.info}',1)`
+    const sql = `INSERT INTO medi_connect.laboratoire (nom_ut, email, mdp,role,image,id_ville,heurD,heurF,info,approuve,mode_pre,adresse) 
+                       VALUES ('${json.nom_ut}', '${json.email}', '${hashedPassword}',3, '${req.checkUrl}', '${json.id_ville}', '${json.heurD}','${json.heurF}','${json.info}',1,'${json.mode_pre}','${json.adresse}')`
 
     await pool.query(sql)
 
@@ -144,10 +144,9 @@ export const liste = async (req: any) => {
     const offset = (currentPage - 1) * itemsPerPage
 
     const sql = `
-    SELECT l.*, v.ville AS ville, s.ser AS ser
+    SELECT l.*, v.ville AS ville
     FROM laboratoire l 
     LEFT JOIN ville v ON l.id_ville = v.id 
-    LEFT JOIN service s ON l.id_ser = s.id
     ${whereClause} LIMIT
         ${itemsPerPage}
     OFFSET
@@ -212,7 +211,7 @@ export const modifier = async (req: any) => {
     })
 
     const id = json.id
-    const sql = `UPDATE medi_connect.laboratoire SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',id_ville='${json.id_ville}',heurD='${json.heurD}',heurF='${json.heurF}',id_ser='${json.id_ser}',info='${json.info}' where id='${id}'`
+    const sql = `UPDATE medi_connect.laboratoire SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',id_ville='${json.id_ville}',heurD='${json.heurD}',heurF='${json.heurF}',info='${json.info}',mode_pre='${json.mode_pre}',adresse='${json.adresse}' where id='${id}'`
 
     await pool.query(sql)
 

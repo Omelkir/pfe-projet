@@ -50,13 +50,13 @@ const DashboardAnalytics = () => {
   ) : typeOfLogger === 2 ? (
     <Grid container spacing={6}>
       <Grid item xs={12} md={10} lg={8} sx={{ height: '300px' }}>
-        <Transactions title='Good Morning' nom={`Dr. ${userData.nom}`} image='bg' />
+        <Transactions title='Bonjour' nom={`Dr. ${userData.nom}`} image='bg' />
       </Grid>
       <Grid item xs={12} md={2}>
         <Award icons='ri-user-line' number='3809' title='Patients' color='#0573b8' bg='#e3eefd' />
       </Grid>
       <Grid item xs={12} md={2}>
-        <Award icons='ri-money-dollar-circle-line' number='$986K' title='Earnings' color='#0ebb13' bg='#e9fdea' />
+        <Award icons='ri-money-dollar-circle-line' number='$986K' title='Gains' color='#0ebb13' bg='#e9fdea' />
       </Grid>
       <Grid item xs={12} md={6} lg={6}>
         <PatientChart />
@@ -71,7 +71,7 @@ const DashboardAnalytics = () => {
   ) : typeOfLogger === 1 ? (
     <Grid container spacing={6}>
       <Grid item xs={12} md={6} lg={6} sx={{ height: '300px' }}>
-        <Transactions title='Good Morning' nom={`Dr. ${userData.nom}`} image='bgAdmin' />
+        <Transactions title='Bonjour' nom={`${userData.nom}`} image='bgAdmin' />
       </Grid>
       <Grid item xs={12} md={2}>
         <Award icons='ri-user-line' number='3809' title='Patients' color='#ff5a39' bg='#ffefec' />

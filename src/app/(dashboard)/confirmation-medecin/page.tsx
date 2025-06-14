@@ -57,7 +57,7 @@ const Confirmation = () => {
     <div>
       <Card>
         <CardContent>
-          <Arrow title='Dashboard' subTitle='Réclamation' />
+          <Arrow title='Dashboard' subTitle='Confirmation' />
 
           <Grid item xs={12}>
             <Table onDelete={handleOpenDeleteModal} update={update} setUpdate={setUpdate} />

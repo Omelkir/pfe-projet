@@ -29,7 +29,7 @@ const Table = ({
 
   async function getPatientsList(page = 1) {
     try {
-      const url = `${window.location.origin}/api/patient/liste?isApproved=0&page=${page}`
+      const url = `${window.location.origin}/api/patient/liste?approuve=0&page=${page}`
 
       const requestOptions = {
         method: 'GET',

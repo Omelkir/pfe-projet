@@ -21,6 +21,7 @@ import { SimpleSlideshow } from '@/components/auto-images/images'
 import { StarRating } from '@/components/ui/star-rating'
 import { getStorageData } from '@/utils/helpersFront'
 import RendezVousModal from '@/components/modals/rendezVousFormModal'
+import ConnModal from '@/components/modals/conOblig'
 
 const Laboratoire = () => {
   const userData = getStorageData('user')
@@ -30,6 +31,8 @@ const Laboratoire = () => {
   const onPagination = (e: any) => {
     getLaboratoireList(e)
   }
+
+  const [isConnModalOpen, setIsConnModalOpen] = useState(false)
 
   const [villeListe, setVilleListe] = useState<any[]>([])
 
@@ -229,9 +232,12 @@ const Laboratoire = () => {
                         color='primary'
                         size='small'
                         onClick={() => {
-                          setSelectedLaboId(laboratoire.id)
-                          console.log('laboratoire:', laboratoire.id)
-                          setIsModalOpen(true)
+                          if (!userData) {
+                            setIsConnModalOpen(true)
+                          } else {
+                            setSelectedLaboId(laboratoire.id)
+                            setIsModalOpen(true)
+                          }
                         }}
                       >
                         Rendez-vous
@@ -288,6 +294,7 @@ const Laboratoire = () => {
           laboId={selectedLaboId}
           medecinId={null}
         />
+        <ConnModal isOpen={isConnModalOpen} onClose={() => setIsConnModalOpen(false)} />
       </Grid>
       <Grid item xs={12} className='mt-6 pb-6 justify-items-end'>
         <Pagination

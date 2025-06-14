@@ -6,8 +6,6 @@ import fs from 'fs'
 
 import bcrypt from 'bcrypt'
 
-import multer from 'multer'
-
 import { v4 as uuidv4 } from 'uuid'
 
 import pool from '@/utils/connexion'
@@ -74,18 +72,18 @@ export const ajouter = async (req: any) => {
   const hashedPassword = await bcrypt.hash(json.mdp, saltRounds)
 
   if (table === 'patient') {
-    const sql = `INSERT INTO medi_connect.patient (nom, prenom, email, mdp, role, image, id_ville, isApproved, age, tel)
+    const sql = `INSERT INTO medi_connect.patient (nom, prenom, email, mdp, role, image, id_ville, approuve, age, tel)
       VALUES ('${json.nom}', '${json.prenom}','${json.email}','${hashedPassword}',4, '${req.checkUrl}', '${json.id_ville}', 0,'${json.age}', '${json.tel}')`
 
     await pool.query(sql)
   } else if (table === 'medecin') {
-    const sql = `INSERT INTO medi_connect.medecin (nom_ut, email, mdp, role, image, tarif, id_ville, heurD, heurF, id_spe, info, isApproved)
-      VALUES ('${json.nom_ut}','${json.email}','${hashedPassword}',2, '${req.checkUrl}','${json.tarif}', '${json.id_ville}','${json.heurD}','${json.heurF}','${json.id_spe}', '${json.info}',0)`
+    const sql = `INSERT INTO medi_connect.medecin (nom_ut, email, mdp, role, image, tarif, id_ville, heurD, heurF, id_spe, info, approuve,adresse)
+      VALUES ('${json.nom_ut}','${json.email}','${hashedPassword}',2, '${req.checkUrl}','${json.tarif}', '${json.id_ville}','${json.heurD}','${json.heurF}','${json.id_spe}', '${json.info}',0,'${json.adresse}')`
 
     await pool.query(sql)
   } else if (table === 'laboratoire') {
-    const sql = `INSERT INTO medi_connect.laboratoire (nom_ut, email, mdp, role, image, id_ville, heurD, heurF, id_ser, info, isApproved)
-      VALUES ('${json.nom_ut}','${json.email}','${hashedPassword}',3, '${req.checkUrl}', '${json.id_ville}','${json.heurD}','${json.heurF}','${json.ser}', '${json.info}',0)`
+    const sql = `INSERT INTO medi_connect.laboratoire (nom_ut, email, mdp, role, image, id_ville, heurD, heurF, info, approuve,mode_pre,adresse)
+      VALUES ('${json.nom_ut}','${json.email}','${hashedPassword}',3, '${req.checkUrl}', '${json.id_ville}','${json.heurD}','${json.heurF}', '${json.info}',0,'${json.mode_pre}','${json.adresse}')`
 
     await pool.query(sql)
   }

@@ -5,8 +5,6 @@ import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 
-import { useRouter } from 'next/navigation'
-
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
@@ -15,9 +13,25 @@ import Button from '@mui/material/Button'
 import { FormControl, Input, InputLabel, MenuItem, Select, Grid } from '@mui/material'
 
 import Logo from '@components/layout/shared/Logo'
+import SuccesModal from '@/components/modals/succes'
 
 const Register = () => {
   const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
+  const phoneCheck = (tel: any) => !/^[259]\d{7}$/.test(tel)
+
+  const ageCheck = (age: any) => {
+    const num = Number(age)
+
+    return !isNaN(num) && num >= 18 && num <= 60
+  }
+
+  const tarifCheck = (tarif: any) => {
+    const num = Number(tarif)
+
+    return !isNaN(tarif)
+  }
+
+  const addressCheck = (address: string) => /^[\wÀ-ÿ0-9\s,.'\-]{5,100}$/.test(address.trim())
 
   const passwordCheck = (password: any) =>
     !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
@@ -27,6 +41,7 @@ const Register = () => {
 
   const [data, setData] = useState<any>({
     imageSrc: '/img/placeholder-image.jpg',
+    adresse: '',
     image: '',
     email: '',
     mdp: '',
@@ -43,12 +58,11 @@ const Register = () => {
     age: '',
     tel: '',
     id_spe: 0,
-    ser: 0
+    mode_pre: 0
   })
 
   const [villeListe, setVilleListe] = useState<any[]>([])
   const [speListe, setSpeListe] = useState<any[]>([])
-  const [serListe, setSerListe] = useState<any[]>([])
 
   async function getVilleList() {
     try {
@@ -114,38 +128,6 @@ const Register = () => {
     getSpeList()
   }, [])
 
-  async function getSerList() {
-    try {
-      const url = `${window.location.origin}/api/service/liste`
-
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      }
-
-      const response = await fetch(url, requestOptions)
-
-      if (!response.ok) throw new Error('Erreur lors de la requête')
-
-      const responseData = await response.json()
-
-      console.log('API Response:', responseData)
-
-      if (responseData.erreur) {
-        alert(responseData.message)
-      } else {
-        setSerListe(responseData.data)
-      }
-    } catch (error) {
-      console.error('Erreur:', error)
-      alert('Une erreur est survenue lors de la récupération des données.')
-    }
-  }
-
-  useEffect(() => {
-    getSerList()
-  }, [])
-
   const handleImageChange = (e: any) => {
     const file = e.target.files[0]
 
@@ -155,22 +137,34 @@ const Register = () => {
         imageSrc: URL.createObjectURL(file)
       }))
 
-      // Lire le fichier en Base64
       const reader = new FileReader()
 
-      reader.readAsDataURL(file) // Convertir le fichier en Base64
+      reader.readAsDataURL(file)
     }
   }
 
   const [controls, setControls] = useState<any>({
+    adresse: false,
     email: false,
     mdp: false,
     conMdp: false,
     emailValid: false,
+    tel: false,
+    telValid: false,
     role: false,
     nom: false,
     prenom: false,
-    nom_ut: false
+    nom_ut: false,
+    mode_pre: false,
+    spe: false,
+    id_ville: false,
+    age: false,
+    ageValid: false,
+    id_spe: false,
+    heurD: false,
+    heurF: false,
+    tarif: false,
+    tarifValid: false
   })
 
   const options = [
@@ -179,9 +173,12 @@ const Register = () => {
     { label: 'Laboratoire', value: 3 }
   ]
 
+  const [openSuccessModal, setOpenSuccessModal] = useState(false)
+
   const clearForm = () => {
     setData({
       imageSrc: '/img/placeholder-image.jpg',
+      adresse: '',
       image: '',
       email: '',
       mdp: '',
@@ -198,16 +195,30 @@ const Register = () => {
       age: '',
       tel: '',
       id_spe: 0,
-      ser: 0
+      mode_pre: 0
     })
     setControls({
+      adresse: false,
       email: false,
       mdp: false,
       conMdp: false,
+      emailValid: false,
+      tel: false,
+      telValid: false,
       role: false,
-      nom_ut: false,
       nom: false,
-      prenom: false
+      prenom: false,
+      nom_ut: false,
+      mode_pre: false,
+      spe: false,
+      id_ville: false,
+      age: false,
+      ageValid: false,
+      id_spe: false,
+      heurD: false,
+      heurF: false,
+      tarif: false,
+      tarifValid: false
     })
   }
 
@@ -222,14 +233,35 @@ const Register = () => {
         conMdpValid: passwordCheck(data.conMdp.trim()),
         mdp: data.mdp.trim() === '',
         conMdp: data.conMdp.trim() === '',
-
         role: data.role === 0,
         ...(data.role === 4 && {
+          age: data.age.trim() === '',
+          ageValid: ageCheck(data.age.trim()),
           nom: data.nom.trim() === '',
-          prenom: data.prenom.trim() === ''
+          tel: data.tel.trim() === '',
+          telValid: phoneCheck(data.tel.trim()),
+          prenom: data.prenom.trim() === '',
+          id_ville: data.id_ville === 0
         }),
-        ...((data.role === 2 || data.role === 3) && {
-          nom_ut: data.nom_ut.trim() === ''
+        ...(data.role === 2 && {
+          nom_ut: data.nom_ut.trim() === '',
+          id_spe: data.id_spe === 0,
+          id_ville: data.id_ville === 0,
+          adresse: data.adresse.trim() === '',
+          addressValid: addressCheck(data.adresse.trim()),
+          heurD: data.heurD.trim() === '',
+          heurF: data.heurF.trim() === '',
+          tarif: data.tarif.trim() === '',
+          tarifValid: tarifCheck(data.tarif.trim())
+        }),
+        ...(data.role === 3 && {
+          nom_ut: data.nom_ut.trim() === '',
+          mode_pre: data.mode_pre === 0,
+          id_ville: data.id_ville === 0,
+          adresse: data.adresse.trim() === '',
+          addressCheck: phoneCheck(data.adresse.trim()),
+          heurD: data.heurD.trim() === '',
+          heurF: data.heurF.trim() === ''
         })
       }
 
@@ -265,7 +297,7 @@ const Register = () => {
         alert(responseData.message)
       } else {
         setData(responseData)
-
+        setOpenSuccessModal(true)
         clearForm()
       }
     } catch (error) {
@@ -273,14 +305,19 @@ const Register = () => {
     }
   }
 
-  const router = useRouter()
+  const prelevListe = [
+    { label: 'Prélèvement à domicile', value: 1 },
+    { label: 'Prélèvement sur place au laboratoire', value: 2 },
+    { label: 'Prélèvement sur place au laboratoire et à domicile', value: 3 }
+  ]
+
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const handleClickShowPassword2 = () => setIsPasswordShown2(show => !show)
 
   return (
-    <div className='flex flex-col w-full md:w-full lg:flex-row min-h-screen items-center justify-center relative h-screen bg-white'>
-      <div className='hidden lg:flex flex-1 justify-center items-center min-h-screen bg-gray-100'>
+    <div className='flex flex-col w-full md:w-full lg:flex-row items-start justify-start min-h-screen bg-white'>
+      <div className='hidden lg:flex flex-1 justify-center items-center  h-auto bg-gray-100'>
         <span className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]'>
           <Logo />
         </span>
@@ -288,9 +325,8 @@ const Register = () => {
         <img src='/images/pages/doc1.svg' className='max-w-[800px] w-full' />
       </div>
 
-      {/* Formulaire */}
-      <div className='flex flex-col justify-center items-center w-full max-w-xl p-12 min-h-screen space-y-6'>
-        <div className='mb-3'>
+      <div className='flex flex-col justify-center items-center w-full max-w-xl px-12  h-auto space-y-6'>
+        <div className='mb-3 mt-8'>
           <h3 className='text-2xl font-bold md:text-3xl'>S’inscrire </h3>
         </div>
         <form noValidate autoComplete='off' className='w-full space-y-6 mt-8'>
@@ -301,7 +337,7 @@ const Register = () => {
                 <InputLabel>Role</InputLabel>
                 <Select
                   label='Role'
-                  className={`h-12 md:h-[60px] ${controls?.role === true ? 'isReq' : ''}`}
+                  className={`${controls?.role === true ? 'isReq' : ''}`}
                   value={data?.role || null}
                   onChange={(e: any) => {
                     if (e === null) {
@@ -347,7 +383,7 @@ const Register = () => {
                   src={data.imageSrc}
                   style={{ cursor: 'pointer' }}
                   alt=''
-                  className='w-[40.5px] h-[40.5px] md:w-[60px] md:h-[60px]'
+                  className='w-[60px] h-[60px]'
                   width={60}
                   height={60}
                 />
@@ -379,23 +415,15 @@ const Register = () => {
                       }))
                     }
                   }}
-                  autoFocus
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.875rem', // mobile: 12px
-                      '@media (min-width:768px)': {
-                        fontSize: '1rem' // md+: 16px
-                      }
+                      fontSize: '1rem'
                     }
                   }}
                   InputProps={{
                     sx: {
-                      height: 48, // mobile default
-                      fontSize: '0.875rem', // 14px
-                      '@media (min-width:768px)': {
-                        height: 60, // md and up
-                        fontSize: '1rem' // 16px
-                      },
+                      height: 60, // md and up
+                      fontSize: '1rem', // 16px
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
                           fontSize: '1rem'
@@ -431,23 +459,15 @@ const Register = () => {
                       }))
                     }
                   }}
-                  autoFocus
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.875rem', // mobile: 12px
-                      '@media (min-width:768px)': {
-                        fontSize: '1rem' // md+: 16px
-                      }
+                      fontSize: '1rem'
                     }
                   }}
                   InputProps={{
                     sx: {
-                      height: 48, // mobile default
-                      fontSize: '0.875rem', // 14px
-                      '@media (min-width:768px)': {
-                        height: 60, // md and up
-                        fontSize: '1rem' // 16px
-                      },
+                      height: 60, // md and up
+                      fontSize: '1rem',
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
                           fontSize: '1rem'
@@ -481,23 +501,15 @@ const Register = () => {
                       }))
                     }
                   }}
-                  autoFocus
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.875rem', // mobile: 12px
-                      '@media (min-width:768px)': {
-                        fontSize: '1rem' // md+: 16px
-                      }
+                      fontSize: '1rem'
                     }
                   }}
                   InputProps={{
                     sx: {
-                      height: 48, // mobile default
-                      fontSize: '0.875rem', // 14px
-                      '@media (min-width:768px)': {
-                        height: 60, // md and up
-                        fontSize: '1rem' // 16px
-                      },
+                      height: 60, // md and up
+                      fontSize: '1rem',
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
                           fontSize: '1rem'
@@ -515,39 +527,28 @@ const Register = () => {
                   fullWidth
                   label='Âge'
                   value={data?.age ?? ''}
-                  className={`${controls?.age === true ? 'isReq' : ''}`}
+                  className={`${controls?.age === true || controls.ageValid === true ? 'isReq' : ''}`}
                   onChange={(e: any) => {
-                    if (e.target?.value.trim() === '') {
-                      setControls({ ...controls, age: true })
-                      setData((prev: any) => ({
-                        ...prev,
-                        age: e.target.value
-                      }))
-                    } else {
-                      setControls({ ...controls, age: false })
-                      setData((prev: any) => ({
-                        ...prev,
-                        age: e.target.value
-                      }))
-                    }
+                    const value = e.target.value
+                    const isEmpty = value.trim() === ''
+                    const isInvalid = ageCheck(value.trim())
+
+                    setData((prev: any) => ({ ...prev, age: value }))
+                    setControls((prev: any) => ({
+                      ...prev,
+                      age: isEmpty,
+                      ageValid: !isEmpty && !isInvalid
+                    }))
                   }}
-                  autoFocus
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.875rem', // mobile: 12px
-                      '@media (min-width:768px)': {
-                        fontSize: '1rem' // md+: 16px
-                      }
+                      fontSize: '1rem'
                     }
                   }}
                   InputProps={{
                     sx: {
-                      height: 48, // mobile default
-                      fontSize: '0.875rem', // 14px
-                      '@media (min-width:768px)': {
-                        height: 60, // md and up
-                        fontSize: '1rem' // 16px
-                      },
+                      height: 60,
+                      fontSize: '1rem',
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
                           fontSize: '1rem'
@@ -556,7 +557,11 @@ const Register = () => {
                     }
                   }}
                 />
-                {controls?.age === true ? <span className='errmsg'>Veuillez saisir l’age !</span> : null}
+                {controls?.age === true ? (
+                  <span className='errmsg'>Veuillez saisir l’age !</span>
+                ) : controls.ageValid === true ? (
+                  <span className='errmsg'>Âge invalide : il doit être un nombre entre 18 et 60 ans</span>
+                ) : null}
               </Grid>
             ) : null}
             {data?.role === 4 ? (
@@ -565,39 +570,28 @@ const Register = () => {
                   fullWidth
                   label='Numéro de téléphone'
                   value={data?.tel ?? ''}
-                  className={`${controls?.tel === true ? 'isReq' : ''}`}
+                  className={`${controls?.tel === true || controls.telValid === true ? 'isReq' : ''}`}
                   onChange={(e: any) => {
-                    if (e.target?.value.trim() === '') {
-                      setControls({ ...controls, tel: true })
-                      setData((prev: any) => ({
-                        ...prev,
-                        tel: e.target.value
-                      }))
-                    } else {
-                      setControls({ ...controls, tel: false })
-                      setData((prev: any) => ({
-                        ...prev,
-                        tel: e.target.value
-                      }))
-                    }
+                    const value = e.target.value
+                    const isEmpty = value.trim() === ''
+                    const isInvalid = phoneCheck(value.trim())
+
+                    setData((prev: any) => ({ ...prev, tel: value }))
+                    setControls((prev: any) => ({
+                      ...prev,
+                      tel: isEmpty,
+                      telValid: !isEmpty && isInvalid
+                    }))
                   }}
-                  autoFocus
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.875rem', // mobile: 12px
-                      '@media (min-width:768px)': {
-                        fontSize: '1rem' // md+: 16px
-                      }
+                      fontSize: '1rem'
                     }
                   }}
                   InputProps={{
                     sx: {
-                      height: 48, // mobile default
-                      fontSize: '0.875rem', // 14px
-                      '@media (min-width:768px)': {
-                        height: 60, // md and up
-                        fontSize: '1rem' // 16px
-                      },
+                      height: 60, // md and up
+                      fontSize: '1rem',
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
                           fontSize: '1rem'
@@ -606,8 +600,13 @@ const Register = () => {
                     }
                   }}
                 />
+
                 {controls?.tel === true ? (
                   <span className='errmsg'>Veuillez saisir le numéro de téléphone !</span>
+                ) : controls.telValid === true ? (
+                  <span className='errmsg'>
+                    Numéro de téléphone invalide : il doit contenir 8 chiffres et commencer par 2, 5 ou 9
+                  </span>
                 ) : null}
               </Grid>
             ) : null}
@@ -621,20 +620,13 @@ const Register = () => {
                 label='Email'
                 InputLabelProps={{
                   sx: {
-                    fontSize: '0.875rem', // mobile: 12px
-                    '@media (min-width:768px)': {
-                      fontSize: '1rem' // md+: 16px
-                    }
+                    fontSize: '1rem'
                   }
                 }}
                 InputProps={{
                   sx: {
-                    height: 48, // mobile default
-                    fontSize: '0.875rem', // 14px
-                    '@media (min-width:768px)': {
-                      height: 60, // md and up
-                      fontSize: '1rem' // 16px
-                    },
+                    height: 60, // md and up
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -671,13 +663,20 @@ const Register = () => {
                   <InputLabel>Spéciallité</InputLabel>
                   <Select
                     label='Spéciallité'
-                    className='h-12 md:h-[60px]'
-                    value={data?.id_spe || null}
+                    className={`${controls?.id_spe === true ? 'isReq' : ''}`}
                     onChange={(e: any) => {
                       if (e === null) {
-                        setData({ ...data, iid_spe: e.target.value })
+                        setControls({ ...controls, id_spe: true })
+                        setData((prev: any) => ({
+                          ...prev,
+                          id_spe: e.target.value
+                        }))
                       } else {
-                        setData({ ...data, id_spe: e.target.value })
+                        setControls({ ...controls, id_spe: false })
+                        setData((prev: any) => ({
+                          ...prev,
+                          id_spe: e.target.value
+                        }))
                       }
                     }}
                   >
@@ -688,6 +687,9 @@ const Register = () => {
                     ))}
                   </Select>
                 </FormControl>
+                {controls?.id_spe === true ? (
+                  <span className='errmsg'>Veuillez sélectionner la spéciallité !</span>
+                ) : null}
               </Grid>
             ) : null}
             {data?.role === 2 ? (
@@ -696,29 +698,15 @@ const Register = () => {
                   fullWidth
                   label='Tarif'
                   value={data?.tarif ?? ''}
-                  onChange={(e: any) => {
-                    setData((prev: any) => ({
-                      ...prev,
-                      tarif: e.target.value
-                    }))
-                  }}
-                  autoFocus
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.875rem', // mobile: 12px
-                      '@media (min-width:768px)': {
-                        fontSize: '1rem' // md+: 16px
-                      }
+                      fontSize: '1rem'
                     }
                   }}
                   InputProps={{
                     sx: {
-                      height: 48, // mobile default
-                      fontSize: '0.875rem', // 14px
-                      '@media (min-width:768px)': {
-                        height: 60, // md and up
-                        fontSize: '1rem' // 16px
-                      },
+                      height: 60, // md and up
+                      fontSize: '1rem',
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
                           fontSize: '1rem'
@@ -726,47 +714,51 @@ const Register = () => {
                       }
                     }
                   }}
-                />
-              </Grid>
-            ) : null}
-            {data?.role === 3 ? (
-              <Grid item xs={6} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Service</InputLabel>
-                  <Select
-                    label='Service'
-                    className='h-12 md:h-[60px]'
-                    value={data?.ser || null}
-                    onChange={(e: any) => {
-                      if (e === null) {
-                        setData({ ...data, ser: e.target.value })
-                      } else {
-                        setData({ ...data, ser: e.target.value })
-                      }
-                    }}
-                  >
-                    {serListe.map((item: any) => (
-                      <MenuItem value={item.id} key={item.id}>
-                        {item.ser}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            ) : null}
+                  className={`${controls?.tarif === true || controls.tarifValid === true ? 'isReq' : ''}`}
+                  onChange={(e: any) => {
+                    const value = e.target.value
+                    const isEmpty = value.trim() === ''
+                    const isInvalid = tarifCheck(value.trim())
 
-            <Grid item xs={data.role == 3 || data.role == 4 ? 6 : 12} md={data.role == 3 || data.role == 4 ? 6 : 12}>
+                    setData((prev: any) => ({ ...prev, tarif: value }))
+                    setControls((prev: any) => ({
+                      ...prev,
+                      tarif: isEmpty,
+                      tarifValid: !isEmpty && !isInvalid
+                    }))
+                  }}
+                />
+                {controls?.tarif === true ? (
+                  <span className='errmsg'>Veuillez saisir le tarif !</span>
+                ) : controls.tarifValid === true ? (
+                  <span className='errmsg'>Le tarif est invalide : il doit être un nombre.</span>
+                ) : null}
+              </Grid>
+            ) : null}
+            <Grid
+              item
+              xs={data.role == 2 || data.role == 3 || data.role == 4 ? 6 : 12}
+              md={data.role == 2 || data.role == 3 || data.role == 4 ? 6 : 12}
+            >
               <FormControl fullWidth>
                 <InputLabel>Ville</InputLabel>
                 <Select
                   label='Ville'
-                  className='h-12 md:h-[60px]'
-                  value={data?.id_ville || null}
+                  className={`${controls?.id_ville === true ? 'isReq' : ''}`}
+                  value={data?.id_ville ?? ''}
                   onChange={(e: any) => {
                     if (e === null) {
-                      setData({ ...data, id_ville: e.target.value })
+                      setControls({ ...controls, id_ville: true })
+                      setData((prev: any) => ({
+                        ...prev,
+                        id_ville: e.target.value
+                      }))
                     } else {
-                      setData({ ...data, id_ville: e.target.value })
+                      setControls({ ...controls, id_ville: false })
+                      setData((prev: any) => ({
+                        ...prev,
+                        id_ville: e.target.value
+                      }))
                     }
                   }}
                 >
@@ -777,37 +769,124 @@ const Register = () => {
                   ))}
                 </Select>
               </FormControl>
+              {controls?.id_ville === true ? <span className='errmsg'>Veuillez sélectionner la ville!</span> : null}
             </Grid>
+            {data?.role === 3 ? (
+              <Grid item xs={6} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Mode de prélèvement</InputLabel>
+                  <Select
+                    label='Mode de prélèvement'
+                    className={`${controls?.mode_pre === true ? 'isReq' : ''}`}
+                    value={data?.mode_pre || null}
+                    onChange={(e: any) => {
+                      if (e === null) {
+                        setControls({ ...controls, mode_pre: true })
+                        setData((prev: any) => ({
+                          ...prev,
+                          mode_pre: e.target.value
+                        }))
+                      } else {
+                        setControls({ ...controls, mode_pre: false })
+                        setData((prev: any) => ({
+                          ...prev,
+                          mode_pre: e.target.value
+                        }))
+                      }
+                    }}
+                  >
+                    {prelevListe.map((item: any) => (
+                      <MenuItem value={item.value} key={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {controls?.mode_pre === true ? (
+                  <span className='errmsg'>Veuillez sélectionner le mode de prélèvement!</span>
+                ) : null}
+              </Grid>
+            ) : null}
+            {data?.role === 2 || data?.role === 3 ? (
+              <Grid item xs={data.role == 2 ? 6 : 12} md={data.role == 2 ? 6 : 12}>
+                <TextField
+                  fullWidth
+                  label='Adresse'
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '1rem'
+                    }
+                  }}
+                  InputProps={{
+                    sx: {
+                      height: 60,
+                      fontSize: '1rem',
+                      '&.Mui-focused': {
+                        '& + .MuiInputLabel-root': {
+                          fontSize: '1rem'
+                        }
+                      }
+                    }
+                  }}
+                  value={data?.adresse ?? ''}
+                  className={`${controls?.adresse === true || controls.addressValid === true ? 'isReq' : ''}`}
+                  onChange={(e: any) => {
+                    const value = e.target.value
+                    const isEmpty = value.trim() === ''
+                    const isInvalid = addressCheck(value.trim())
+
+                    setData((prev: any) => ({ ...prev, adresse: value }))
+                    setControls((prev: any) => ({
+                      ...prev,
+                      adresse: isEmpty,
+                      addressValid: !isEmpty && isInvalid
+                    }))
+                  }}
+                />
+                {controls?.adresse === true ? (
+                  <span className='errmsg'>Veuillez saisir l’adresse !</span>
+                ) : controls.addressValid === true ? (
+                  <span className='errmsg'>
+                    <span className='errmsg'>
+                      Adresse invalide : elle doit contenir au moins 5 caractères et ne pas inclure de symboles spéciaux
+                      non autorisés.
+                    </span>
+                  </span>
+                ) : null}
+              </Grid>
+            ) : null}
 
             {data?.role === 2 || data?.role === 3 ? (
               <Grid item xs={6} md={6}>
                 <TextField
                   fullWidth
                   type='time'
+                  className={`${controls?.heurD === true ? 'isReq' : ''}`}
                   value={data?.heurD ?? ''}
                   onChange={(e: any) => {
-                    setData((prev: any) => ({
-                      ...prev,
-                      heurD: e.target.value
-                    }))
+                    if (e.target?.value.trim() === '') {
+                      setControls({ ...controls, heurD: true })
+                      setData((prev: any) => ({
+                        ...prev,
+                        heurD: e.target.value
+                      }))
+                    } else {
+                      setControls({ ...controls, heurD: false })
+                      setData((prev: any) => ({
+                        ...prev,
+                        heurD: e.target.value
+                      }))
+                    }
                   }}
-                  autoFocus
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.875rem', // mobile: 12px
-                      '@media (min-width:768px)': {
-                        fontSize: '1rem' // md+: 16px
-                      }
+                      fontSize: '1rem'
                     }
                   }}
                   InputProps={{
                     sx: {
-                      height: 48, // mobile default
-                      fontSize: '0.875rem', // 14px
-                      '@media (min-width:768px)': {
-                        height: 60, // md and up
-                        fontSize: '1rem' // 16px
-                      },
+                      height: 60,
+                      fontSize: '1rem',
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
                           fontSize: '1rem'
@@ -816,6 +895,9 @@ const Register = () => {
                     }
                   }}
                 />
+                {controls?.heurD === true ? (
+                  <span className='errmsg'>Veuillez sélectionner l’heure de début de travail !</span>
+                ) : null}
               </Grid>
             ) : null}
             {data?.role === 2 || data?.role === 3 ? (
@@ -823,30 +905,32 @@ const Register = () => {
                 <TextField
                   fullWidth
                   type='time'
+                  className={`${controls?.heurF === true ? 'isReq' : ''}`}
                   value={data?.heurF ?? ''}
                   onChange={(e: any) => {
-                    setData((prev: any) => ({
-                      ...prev,
-                      heurF: e.target.value
-                    }))
+                    if (e.target?.value.trim() === '') {
+                      setControls({ ...controls, heurF: true })
+                      setData((prev: any) => ({
+                        ...prev,
+                        heurF: e.target.value
+                      }))
+                    } else {
+                      setControls({ ...controls, heurF: false })
+                      setData((prev: any) => ({
+                        ...prev,
+                        heurF: e.target.value
+                      }))
+                    }
                   }}
-                  autoFocus
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.875rem', // mobile: 12px
-                      '@media (min-width:768px)': {
-                        fontSize: '1rem' // md+: 16px
-                      }
+                      fontSize: '1rem'
                     }
                   }}
                   InputProps={{
                     sx: {
-                      height: 48, // mobile default
-                      fontSize: '0.875rem', // 14px
-                      '@media (min-width:768px)': {
-                        height: 60, // md and up
-                        fontSize: '1rem' // 16px
-                      },
+                      height: 60,
+                      fontSize: '1rem',
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
                           fontSize: '1rem'
@@ -855,6 +939,9 @@ const Register = () => {
                     }
                   }}
                 />
+                {controls?.heurF === true ? (
+                  <span className='errmsg'>Veuillez sélectionner l’heure de fin de travail !</span>
+                ) : null}
               </Grid>
             ) : null}
 
@@ -866,21 +953,14 @@ const Register = () => {
                 type={isPasswordShown ? 'text' : 'password'}
                 InputLabelProps={{
                   sx: {
-                    fontSize: '0.875rem', // mobile: 12px
-                    '@media (min-width:768px)': {
-                      fontSize: '1rem' // md+: 16px
-                    }
+                    fontSize: '1rem'
                   }
                 }}
                 className={`${controls?.mdp === true || controls.mdpValid === true ? 'isReq' : ''}`}
                 InputProps={{
                   sx: {
-                    height: 48,
-                    fontSize: '0.875rem',
-                    '@media (min-width:768px)': {
-                      height: 60,
-                      fontSize: '1rem'
-                    },
+                    height: 60,
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -896,11 +976,7 @@ const Register = () => {
                         onClick={handleClickShowPassword}
                         onMouseDown={e => e.preventDefault()}
                       >
-                        <i
-                          className={
-                            isPasswordShown ? 'ri-eye-off-line text-xl md:text-2xl' : 'ri-eye-line text-xl md:text-2xl'
-                          }
-                        />
+                        <i className={isPasswordShown ? 'ri-eye-off-line text-2xl' : 'ri-eye-line text-2xl'} />
                       </IconButton>
                     </InputAdornment>
                   )
@@ -935,21 +1011,14 @@ const Register = () => {
                 type={isPasswordShown2 ? 'text' : 'password'}
                 InputLabelProps={{
                   sx: {
-                    fontSize: '0.875rem', // mobile: 12px
-                    '@media (min-width:768px)': {
-                      fontSize: '1rem' // md+: 16px
-                    }
+                    fontSize: '1rem'
                   }
                 }}
-                className={`${controls?.conMdp === true ? 'isReq' : ''}`}
+                className={`${controls?.conMdp === true || controls.conMdpValid === true ? 'isReq' : ''}`}
                 InputProps={{
                   sx: {
-                    height: 48, // mobile default
-                    fontSize: '0.875rem', // 14px
-                    '@media (min-width:768px)': {
-                      height: 60, // md and up
-                      fontSize: '1rem' // 16px
-                    },
+                    height: 60,
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -962,14 +1031,10 @@ const Register = () => {
                       <IconButton
                         size='large'
                         edge='end'
-                        onClick={handleClickShowPassword}
+                        onClick={handleClickShowPassword2}
                         onMouseDown={e => e.preventDefault()}
                       >
-                        <i
-                          className={
-                            isPasswordShown ? 'ri-eye-off-line text-xl md:text-2xl' : 'ri-eye-line text-xl md:text-2xl'
-                          }
-                        />
+                        <i className={isPasswordShown2 ? 'ri-eye-off-line text-2xl' : 'ri-eye-line text-2xl'} />
                       </IconButton>
                     </InputAdornment>
                   )
@@ -1049,6 +1114,7 @@ const Register = () => {
           </div>
         </form>
       </div>
+      <SuccesModal isOpen={openSuccessModal} onClose={() => setOpenSuccessModal(false)} />
     </div>
   )
 }

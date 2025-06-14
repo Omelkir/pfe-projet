@@ -74,8 +74,8 @@ export const ajouter = async (req: any) => {
 
     const hashedPassword = await bcrypt.hash(motDePasse, 10)
 
-    const sql = `INSERT INTO medi_connect.medecin (nom_ut, email, mdp,role,image,tarif,id_ville,heurD,heurF,id_spe,info,isApproved) 
-                       VALUES ('${json.nom_ut}', '${json.email}', '${hashedPassword}',2, '${req.checkUrl}', '${json.tarif}', '${json.id_ville}', '${json.heurD}', '${json.heurF}', '${json.id_spe}', '${json.info}',1)`
+    const sql = `INSERT INTO medi_connect.medecin (nom_ut, email, mdp,role,image,tarif,id_ville,heurD,heurF,id_spe,info,approuve,adresse) 
+                       VALUES ('${json.nom_ut}', '${json.email}', '${hashedPassword}',2, '${req.checkUrl}', '${json.tarif}', '${json.id_ville}', '${json.heurD}', '${json.heurF}', '${json.id_spe}', '${json.info}',1,'${json.adresse}')`
 
     await pool.query(sql)
 
@@ -139,7 +139,7 @@ export const modifier = async (req: any) => {
 
     const id = json.id
 
-    const sql = `UPDATE medi_connect.medecin SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',tarif='${json.tarif}',id_ville='${json.id_ville}',heurD='${json.heurD}',heurF='${json.heurF}',id_spe='${json.id_spe}',info='${json.info}' where id='${id}'`
+    const sql = `UPDATE medi_connect.medecin SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',tarif='${json.tarif}',id_ville='${json.id_ville}',heurD='${json.heurD}',heurF='${json.heurF}',id_spe='${json.id_spe}',info='${json.info}',adresse='${json.adresse}' where id='${id}'`
 
     await pool.query(sql)
 

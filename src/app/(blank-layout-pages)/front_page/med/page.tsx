@@ -21,6 +21,7 @@ import { SimpleSlideshow } from '@/components/auto-images/images'
 import { StarRating } from '@/components/ui/star-rating'
 import { getStorageData } from '@/utils/helpersFront'
 import RendezVousModal from '@/components/modals/rendezVousFormModal'
+import ConnModal from '@/components/modals/conOblig'
 
 const Medecin = () => {
   const userData = getStorageData('user')
@@ -100,6 +101,7 @@ const Medecin = () => {
   const [selectedMedecinId, setSelectedMedecinId] = useState<any>(null)
   const [data, setData] = useState<any>({ nom_ut: '', id_spe: '', id_ville: '' })
   const [medecins, setMedecins] = useState<any[]>([])
+  const [isConnModalOpen, setIsConnModalOpen] = useState(false)
 
   async function getMedecinList(page = 1) {
     try {
@@ -247,10 +249,12 @@ const Medecin = () => {
                         color='primary'
                         size='small'
                         onClick={() => {
-                          setSelectedMedecinId(medecin.id)
-                          console.log('medecin:', medecin.id)
-
-                          setIsModalOpen(true)
+                          if (!userData) {
+                            setIsConnModalOpen(true)
+                          } else {
+                            setSelectedMedecinId(medecin.id)
+                            setIsModalOpen(true)
+                          }
                         }}
                       >
                         Rendez-vous
@@ -325,7 +329,9 @@ const Medecin = () => {
           medecinId={selectedMedecinId}
           laboId={null}
         />
+        <ConnModal isOpen={isConnModalOpen} onClose={() => setIsConnModalOpen(false)} />
       </Grid>
+
       <Grid item xs={12} className='mt-6 justify-items-end'>
         <Pagination
           total={paginatorInfo.total}

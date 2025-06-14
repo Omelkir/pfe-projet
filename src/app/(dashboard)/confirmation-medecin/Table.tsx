@@ -21,7 +21,7 @@ const Table = ({ update, onDelete, setUpdate }: { update: string; onDelete: (adm
 
   async function getMedecinsList(page = 1) {
     try {
-      const url = `${window.location.origin}/api/medecin/liste?isApproved=0&page=${page}`
+      const url = `${window.location.origin}/api/medecin/liste?approuve=0&page=${page}`
 
       const requestOptions = {
         method: 'GET',
@@ -84,7 +84,7 @@ const Table = ({ update, onDelete, setUpdate }: { update: string; onDelete: (adm
                 <th>Email</th>
                 <th>Ville</th>
                 <th>Spéciallité</th>
-                <th className='text-center'>Approuvé</th>
+                <th className='text-center'>Action</th>
               </tr>
             </thead>
             <tbody>

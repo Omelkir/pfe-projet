@@ -97,7 +97,7 @@ const CalendrierRendezvous = () => {
   async function refrech_envent() {
     try {
       setIsLoading(true)
-      const url = `${window.location.origin}/api/consultation/liste?consultation.isApproved=1&consultation.id_el=${userData.id}&getall`
+      const url = `${window.location.origin}/api/consultation/liste?consultation.approuve=1&consultation.id_el=${userData.id}&getall`
 
       const requestOptions = { method: 'GET', headers: { 'Content-Type': 'application/json' } }
 

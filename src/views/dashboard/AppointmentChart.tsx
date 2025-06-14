@@ -83,7 +83,7 @@ const AppointmentChart = () => {
   return (
     <Card>
       <CardHeader
-        title={<span style={{ fontSize: 20, fontWeight: 'bold', color: '#ffb400' }}>Appointments</span>}
+        title={<span style={{ fontSize: 20, fontWeight: 'bold', color: '#ffb400' }}>Rendez-vous</span>}
         action={<OptionsMenu iconClassName='text-textPrimary' options={['Refresh', 'Update', 'Delete']} />}
       />
 

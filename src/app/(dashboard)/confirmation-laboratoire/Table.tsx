@@ -29,7 +29,7 @@ const Table = ({
 
   async function getLaboratoiresList(page = 1) {
     try {
-      const url = `${window.location.origin}/api/laboratoire/liste?isApproved=0&page=${page}`
+      const url = `${window.location.origin}/api/laboratoire/liste?approuve=0&page=${page}`
 
       const requestOptions = {
         method: 'GET',

@@ -7,25 +7,25 @@ export const verifierUtilisateur = async (req: any) => {
     const { email, mdp } = req
 
     const sql = `
-    SELECT id, nom, prenom, email, mdp, image, role,id_ville,tel,age, '' AS id_spe, '' AS id_ser, 'patient' AS type
+    SELECT id, nom, prenom, email, mdp, image, role,id_ville,tel,age, '' AS id_spe,  'patient' AS type
     FROM medi_connect.patient 
     WHERE email = '${email}'
   
     UNION
   
-    SELECT id, nom_ut AS nom, '' AS prenom, email, mdp, image, role, id_spe,id_ville, '' AS id_ser, 'medecin' AS type ,'' AS tel,'' AS age
+    SELECT id, nom_ut AS nom, '' AS prenom, email, mdp, image, role, id_spe,id_ville, 'medecin' AS type ,'' AS tel,'' AS age
     FROM medi_connect.medecin 
     WHERE email = '${email}'
   
     UNION
   
-    SELECT id, nom_ut AS nom, '' AS prenom, email, mdp, image, role,id_ville, '' AS id_spe, id_ser, 'laboratoire' AS type,'' AS tel,'' AS age 
+    SELECT id, nom_ut AS nom, '' AS prenom, email, mdp, image, role,id_ville, '' AS id_spe, 'laboratoire' AS type,'' AS tel,'' AS age 
     FROM medi_connect.laboratoire 
     WHERE email = '${email}'
   
     UNION
   
-    SELECT id, nom_ut AS nom, '' AS prenom, email, mdp, image, role, '' AS id_spe, '' AS id_ser, 'admin' AS type,'' AS id_ville,'' AS tel,'' AS age 
+    SELECT id, nom_ut AS nom, '' AS prenom, email, mdp, image, role, '' AS id_spe, 'admin' AS type,'' AS id_ville,'' AS tel,'' AS age 
     FROM medi_connect.admin 
     WHERE email = '${email}'
   

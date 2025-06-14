@@ -8,7 +8,7 @@ import ChatbotIcon from './ChatbotIcon'
 import { getStorageData } from '@/utils/helpersFront'
 import ConnModal from '@/components/modals/conOblig'
 
-const GEMINI_API_KEY = 'AIzaSyBZ9zq29OVYpcokmaR3nghpGSfbDC6WGd8'
+const GEMINI_API_KEY = ''
 
 type ChatMessageType = {
   role: 'user' | 'model'
@@ -17,14 +17,27 @@ type ChatMessageType = {
   isPdfAnalysisPrompt?: boolean
 }
 
+const cleanHtmlText = (raw: string) => {
+  return raw
+    .replace(/```html\s*/g, '')
+    .replace(/```/g, '')
+    .replace(/\n{2,}/g, '\n')
+    .replace(/>\s+</g, '><')
+    .trim()
+}
+
 const ChatMessage: React.FC<{ chat: ChatMessageType }> = ({ chat }) => {
   return (
     <div className={`message ${chat.role === 'model' ? 'bot' : 'user'}-message ${chat.isError ? 'error' : ''}`}>
       {chat.role === 'model' && <ChatbotIcon />}
       <div className='message-text'>
-        {chat.isPdfAnalysisPrompt && chat.role === 'user'
-          ? '📄 Analyse PDF envoyée.'
-          : chat.text.split('\n').map((line, index) => <p key={index}>{line}</p>)}
+        {chat.isPdfAnalysisPrompt && chat.role === 'user' ? (
+          '📄 Analyse PDF'
+        ) : chat.role === 'model' ? (
+          <div dangerouslySetInnerHTML={{ __html: cleanHtmlText(chat.text) }} />
+        ) : (
+          chat.text.split('\n').map((line, index) => <p key={index}>{line}</p>)
+        )}
       </div>
     </div>
   )
@@ -77,7 +90,7 @@ const Chatbot: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [chatHistory, setChatHistory] = useState<ChatMessageType[]>([
-    { role: 'model', text: 'Hey there <br /> How can I help you today?' }
+    { role: 'model', text: 'Bonjour Comment puis-je vous aider aujourd’hui ?' }
   ])
 
   const [isLoadingBotResponse, setIsLoadingBotResponse] = useState(false)
@@ -112,7 +125,9 @@ const Chatbot: React.FC = () => {
         const oldMessages: ChatMessageType[] = []
 
         responseData.data.forEach((conv: any) => {
-          const isPdf = conv.question.startsWith('Voici les résultats complets de mon analyse médicale :')
+          const isPdf =
+            conv.question.toLowerCase().includes('résultats complets') &&
+            conv.question.toLowerCase().includes('analyse médicale')
 
           oldMessages.push({
             role: 'user',
@@ -127,7 +142,7 @@ const Chatbot: React.FC = () => {
         })
 
         // Ici, on remplace totalement l'historique par message d'accueil + historique DB
-        setChatHistory([{ role: 'model', text: 'Hey there <br /> How can I help you today?' }, ...oldMessages])
+        setChatHistory([{ role: 'model', text: 'Bonjour Comment puis-je vous aider aujourd’hui ?' }, ...oldMessages])
       } catch (error) {
         console.error('Error fetching past conversations:', error)
       }
@@ -154,10 +169,12 @@ const Chatbot: React.FC = () => {
 
   const generateBotResponse = async (userQuestion: string) => {
     setIsLoadingBotResponse(true)
-    setChatHistory(prev => [...prev, { role: 'model', text: 'Thinking...' }])
+    setChatHistory(prev => [...prev, { role: 'model', text: 'Analyse en cours...' }])
 
     const updateHistory = (text: string, isError = false) => {
-      setChatHistory(prev => prev.filter(msg => msg.text !== 'Thinking...').concat({ role: 'model', text, isError }))
+      setChatHistory(prev =>
+        prev.filter(msg => msg.text !== 'Analyse en cours...').concat({ role: 'model', text, isError })
+      )
       setIsLoadingBotResponse(false)
     }
 
@@ -170,7 +187,7 @@ const Chatbot: React.FC = () => {
           body: JSON.stringify({
             contents: [{ parts: [{ text: userQuestion }] }],
             generationConfig: {
-              maxOutputTokens: 100,
+              maxOutputTokens: 1000,
               temperature: 0.7
             }
           })
@@ -185,8 +202,10 @@ const Chatbot: React.FC = () => {
 
       const apiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Aucune réponse'
 
+      console.log('apiResponseText')
+
       updateHistory(apiResponseText)
-      await handleSaveConversation(userQuestion, apiResponseText) // Save the full userQuestion
+      await handleSaveConversation(userQuestion, apiResponseText)
     } catch (error: any) {
       updateHistory(error.message || 'Error occurred', true)
     }
@@ -201,14 +220,14 @@ const Chatbot: React.FC = () => {
     setIsLoadingBotResponse(true)
 
     setChatHistory(prev => [...prev, { role: 'user', text: `📄 ${file.name}`, isPdfAnalysisPrompt: true }])
-    setChatHistory(prev => [...prev, { role: 'model', text: 'Thinking...' }])
+    setChatHistory(prev => [...prev, { role: 'model', text: 'Analyse en cours...' }])
 
     const formData = new FormData()
 
     formData.append('file', file)
 
     try {
-      const response = await fetch('http://ia:5001/extract', {
+      const response = await fetch('http://localhost:4000/extract', {
         method: 'POST',
         body: formData
       })
@@ -218,7 +237,7 @@ const Chatbot: React.FC = () => {
       if (!response.ok || !result.text) {
         setChatHistory(prev =>
           prev
-            .filter(msg => msg.text !== 'Thinking...')
+            .filter(msg => msg.text !== 'Analyse en cours...')
             .concat({ role: 'model', text: "Erreur lors de l'extraction du texte du PDF.", isError: true })
         )
         setIsLoadingBotResponse(false)
@@ -251,12 +270,14 @@ const Chatbot: React.FC = () => {
         'taux'
       ]
 
-      const isMedical = medicalKeywords.some(keyword => new RegExp(`\\b${keyword}\\b`, 'i').test(extractedText))
+      const foundKeywords = medicalKeywords.filter(keyword => new RegExp(`\\b${keyword}\\b`, 'i').test(extractedText))
+
+      const isMedical = foundKeywords.length >= 3
 
       if (!isMedical) {
         setChatHistory(prev =>
           prev
-            .filter(msg => msg.text !== 'Thinking...')
+            .filter(msg => msg.text !== 'Analyse en cours...')
             .concat({ role: 'model', text: '❌ Le fichier PDF ne semble pas contenir une analyse médicale.' })
         )
         setIsLoadingBotResponse(false)
@@ -264,15 +285,40 @@ const Chatbot: React.FC = () => {
         return
       }
 
-      const fullQuestionForAPI = `Voici les résultats complets d'un analyse médicale :\n${extractedText}\n\n  analyser ce résultat en détail, m'expliquer si cela signifie pour la santé et donne moi les maladie proposé  avec format html élégant ?`
+      const fullQuestionForAPI = `
+Voici les résultats complets d'une analyse médicale :
 
-      setChatHistory(prev => prev.filter(msg => msg.text !== 'Thinking...'))
+${extractedText}
+
+Analyse ces résultats en te basant uniquement sur leur valeur biologique réelle.
+
+Je veux que tu me répondes avec une analyse médicale complète, sans introduction inutile, selon les points suivants pour CHAQUE paramètre biologique trouvé dans le texte :
+
+1. Est-ce que la valeur est normale, basse ou élevée ? (comparée aux normes si disponibles)
+2. Quelle est l’interprétation médicale possible de cette valeur ?
+3. Quelles sont les causes ou maladies possibles si cette valeur est anormale ?
+4. Si nécessaire, fais des liens entre les paramètres (ex : inflammation, diabète, infection...).
+
+⚠️ Format demandé : uniquement en HTML structuré propre pour affichage.
+
+Utilise :
+- <h3> pour le nom de l’analyse (ex: Numération Globulaire, Ionogramme, Bilan Hépatique…)
+- <h4> pour chaque paramètre (ex: Hémoglobine, Sodium, ASAT…)
+- <p> pour les explications
+- <ul><li></li></ul> pour les maladies ou hypothèses possibles
+
+❌ Ne commence pas par "Analysons les résultats de...", va directement au contenu. Ne dis pas "voici ce que cela signifie", mais donne la signification médicale directement.
+`
+
+      console.log(fullQuestionForAPI)
+
+      setChatHistory(prev => prev.filter(msg => msg.text !== 'Analyse en cours...'))
       generateBotResponse(fullQuestionForAPI)
     } catch (error) {
       console.error('Erreur fetch PDF:', error)
       setChatHistory(prev =>
         prev
-          .filter(msg => msg.text !== 'Thinking...')
+          .filter(msg => msg.text !== 'Analyse en cours...')
           .concat({ role: 'model', text: "Erreur réseau ou serveur lors de l'extraction du PDF.", isError: true })
       )
       setIsLoadingBotResponse(false)

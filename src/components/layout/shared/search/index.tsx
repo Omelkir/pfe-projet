@@ -20,7 +20,7 @@ const NavSearch = () => {
         <i className='ri-search-line' style={{ color: 'white', fontSize: '25px' }} />
       </IconButton>
       <div className='whitespace-nowrap select-none text-textDisabled' style={{ color: 'white', fontSize: '15px' }}>
-        Search ⌘K
+        Recherche ⌘K
       </div>
     </div>
   )

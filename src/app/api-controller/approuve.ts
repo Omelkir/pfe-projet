@@ -10,7 +10,7 @@ export const updateApprovalMedecin = async (body: any) => {
 
     const sql = `
       UPDATE medi_connect.medecin
-      SET isApproved =1
+      SET approuve =1
       WHERE id = ${id}
     `
 
@@ -34,7 +34,7 @@ export const updateApprovalLaboratoire = async (body: any) => {
 
     const sql = `
       UPDATE medi_connect.laboratoire
-      SET isApproved =1
+      SET approuve =1
       WHERE id = ${id}
     `
 
@@ -58,7 +58,7 @@ export const updateApprovalPatient = async (body: any) => {
 
     const sql = `
       UPDATE medi_connect.patient
-      SET isApproved =1
+      SET approuve =1
       WHERE id = ${id}
     `
 
@@ -93,11 +93,9 @@ export const updateApprovalConsultation = async (body: any) => {
       )
     }
 
-    
-
     const sql = `
       UPDATE medi_connect.consultation
-      SET isApproved =1
+      SET approuve =1
       WHERE id = ${id}
     `
 

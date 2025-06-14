@@ -41,13 +41,10 @@ export const liste = async (req: any) => {
     const sql = `SELECT
     l.*,
     COALESCE(AVG(s.pr) * 5 / 100, 0) AS sc,
-    sr.ser AS ser,
     v.ville AS ville
   FROM medi_connect.laboratoire l
   LEFT JOIN medi_connect.score s
     ON s.id_el = l.id AND s.el = 3 
-  LEFT JOIN medi_connect.service sr
-   ON l.id_ser = sr.id
   LEFT JOIN medi_connect.ville v
    ON l.id_ville = v.id
   ${whereClause} 

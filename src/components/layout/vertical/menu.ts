@@ -2,7 +2,7 @@ import { SubMenu } from '@/@menu/vertical-menu'
 
 export const menuMed = [
   {
-    label: 'Dashboard Med',
+    label: 'Dashboard',
     path: '/',
     icon: 'ri-dashboard-fill'
   },
@@ -22,7 +22,7 @@ export const menuMed = [
 ]
 export const menulabo = [
   {
-    label: 'Dashboard Labo',
+    label: 'Dashboard',
     path: '/',
     icon: 'ri-dashboard-fill'
   },
@@ -45,7 +45,7 @@ export const menulabo = [
 ]
 export const menuAdmin = [
   {
-    label: 'Dashboard admin',
+    label: 'Dashboard',
     path: '/',
     icon: 'ri-dashboard-fill'
   },
@@ -59,11 +59,7 @@ export const menuAdmin = [
     path: '/laboratoire',
     icon: 'ri-microscope-fill'
   },
-  {
-    label: 'Admin',
-    path: '/admin',
-    icon: 'ri-vip-crown-fill'
-  },
+
   {
     label: 'Patient',
     path: '/patient',
@@ -82,11 +78,6 @@ export const menuAdmin = [
         label: 'Ville',
         path: '/ville',
         icon: 'ri-building-2-fill'
-      },
-      {
-        label: 'Service',
-        path: '/service',
-        icon: 'ri-service-fill'
       }
     ]
   },

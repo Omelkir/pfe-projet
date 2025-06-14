@@ -34,7 +34,7 @@ export default function RendezVousModal({
     id_el: medecinId ?? laboId ?? null,
     el: medecinId ? 2 : laboId ? 3 : null,
     duree: 30,
-    isApproved: 0,
+    approuve: 0,
     description: ''
   })
 
@@ -48,7 +48,7 @@ export default function RendezVousModal({
   const [controls, setControls] = useState<any>({ id_patient: false, date: false, duree: false, description: false })
 
   const clearForm = () => {
-    setData({ id_patient: userDataFront.id, date: '', id_el: '', el: '', duree: 30, isApproved: 0, description: '' })
+    setData({ id_patient: userDataFront.id, date: '', id_el: '', el: '', duree: 30, approuve: 0, description: '' })
     setControls({ id_patient: false, date: false, duree: false, description: false })
   }
 
@@ -128,7 +128,7 @@ export default function RendezVousModal({
         {success ? (
           <div className='flex flex-col items-center justify-center py-8 px-4 text-center'>
             <FaCheckCircle className='text-green-500 text-6xl mb-4' />
-            <h3 className='text-xl font-semibold text-green-700 mb-2'>Rendez-vous confirmé</h3>
+            <h3 className='text-xl font-semibold text-green-700 mb-2'>Rendez-vous envoyé avec succès</h3>
             <p className='text-gray-600'>Votre rendez-vous a été pris avec succès. Merci de votre confiance !</p>
           </div>
         ) : (

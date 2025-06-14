@@ -28,8 +28,7 @@ export default function LaboratoireModal({
     heurD: '',
     heurF: '',
     info: '',
-    nom_ut: '',
-    id_ser: ''
+    nom_ut: ''
   })
 
   const [controls, setControls] = useState<any>({
@@ -125,7 +124,6 @@ export default function LaboratoireModal({
       setData({
         ...laboratoireData,
         imageSrc: laboratoireData.image ? `${laboratoireData.image}` : '/img/placeholder-image.jpg',
-        id_ser: laboratoireData.id_ser ?? '',
         id_ville: laboratoireData.id_ville ?? ''
       })
     } else {
@@ -137,8 +135,7 @@ export default function LaboratoireModal({
         heurD: '',
         heurF: '',
         info: '',
-        nom_ut: '',
-        id_ser: ''
+        nom_ut: ''
       })
     }
   }, [laboratoireData])
@@ -152,8 +149,7 @@ export default function LaboratoireModal({
       heurD: '',
       heurF: '',
       info: '',
-      nom_ut: '',
-      id_ser: ''
+      nom_ut: ''
     })
     setControls({
       email: false,
@@ -363,29 +359,6 @@ export default function LaboratoireModal({
                 Email invalide : il doit contenir @ et se terminer par un domaine valide (ex: .com, .net)
               </span>
             ) : null}
-          </Grid>
-
-          <Grid item xs={6} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Service</InputLabel>
-              <Select
-                label='Service'
-                value={data?.id_ser ?? ''}
-                onChange={(e: any) => {
-                  if (e === null) {
-                    setData({ ...data, id_ser: e.target.value })
-                  } else {
-                    setData({ ...data, id_ser: e.target.value })
-                  }
-                }}
-              >
-                {serListe.map(item => (
-                  <MenuItem value={item.id} key={item.id}>
-                    {item.ser}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
           </Grid>
 
           <Grid item xs={6} md={6}>
