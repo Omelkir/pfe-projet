@@ -41,6 +41,7 @@ const LoginFront = () => {
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [data, setData] = useState<any>({ email: '', mdp: '' })
   const [typeOfLogger, setTypeOfLogger] = useState<number>(-1)
+  const [loginError, setLoginError] = useState<string>('')
 
   const [controls, setControls] = useState<any>({
     email: false,
@@ -90,6 +91,12 @@ const LoginFront = () => {
       const result = await response.json()
 
       if (!result.erreur) {
+        if (result.statusApprove === 'nonApprove') {
+          setLoginError('notApproved')
+
+          return
+        }
+
         setStorageData('typeOfLogger', result.role)
         setStorageData('user', result.user)
         router.push('/front_page')
@@ -126,6 +133,7 @@ const LoginFront = () => {
             Veuillez vous connecter à votre compte et commencer l’aventure
           </Typography>
         </div>
+
         <form className='w-full space-y-6 mt-8'>
           {typeOfLogger === 0 ? (
             <div className='err'>
@@ -133,7 +141,12 @@ const LoginFront = () => {
               <p className='posErreur'>Email ou mot de passe incorrect, veuillez réessayer</p>
             </div>
           ) : null}
-
+          {loginError === 'notApproved' && (
+            <div className='err flex items-center text-red-600 mb-3'>
+              <IconExclamationCircle stroke={2} />
+              <p className='ml-2'>Votre compte n’est pas encore accepté par l’administrateur.</p>
+            </div>
+          )}
           <div>
             <TextField
               fullWidth

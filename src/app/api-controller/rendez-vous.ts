@@ -14,8 +14,8 @@ export const ajouter = async (req: any) => {
 
     const message = `<strong>${prenom} ${nom}</strong> a demandé un rendez-vous pour le <strong>${datePart}</strong> à <strong>${timePart}</strong> via MediConnect.`
 
-    await pool.query(`INSERT INTO medi_connect.notification (date,id_recepteur,el,vu, titre, message) 
-                          VALUES (NOW(),'${json.id_el}','${json.el}', 0,'Rendez-vous','${message}')`)
+    await pool.query(`INSERT INTO medi_connect.notification (date,id_recepteur,el,vu, titre, message,id_patient) 
+                          VALUES (NOW(),'${json.id_el}','${json.el}', 0,'Rendez-vous','${message}','${json.id_patient}')`)
 
     return { erreur: false, data: true }
   } catch (error) {

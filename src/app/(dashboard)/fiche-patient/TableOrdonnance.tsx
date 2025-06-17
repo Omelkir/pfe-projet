@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
@@ -22,7 +22,7 @@ const TableOrdonnance = ({ selectedPatient, consultations }: { selectedPatient: 
   const [update, setUpdate] = useState<string>(new Date().toDateString())
   const [isDeleteModalOpenOrd, setIsDeleteModalOpenOrd] = useState(false)
 
-  const [selectedConst, setselectedConst] = useState<string>('')
+  const [selectedConst, setselectedConst] = useState<number>(0)
 
   const handleOpenOrdModal = (ord: any = null) => {
     setSelected(ord)
@@ -68,21 +68,23 @@ const TableOrdonnance = ({ selectedPatient, consultations }: { selectedPatient: 
   useEffect(() => {
     getOrdonnance()
   }, [selectedPatient, update])
-
-  const ordonnancesByDate: Record<string, any[]> = {}
+  const ordonnancesByDate: Record<string, { id_consultation: number; ordonnances: any[] }> = {}
 
   consultations.forEach((cons: any) => {
     const date = new Date(cons.start).toISOString().split('T')[0]
 
     if (!ordonnancesByDate[date]) {
-      ordonnancesByDate[date] = []
+      ordonnancesByDate[date] = {
+        id_consultation: cons.idd,
+        ordonnances: []
+      }
     }
 
     rowsData.forEach(ord => {
       const ordDate = new Date(ord.consultation_date).toISOString().split('T')[0]
 
       if (ordDate === date) {
-        ordonnancesByDate[date].push(ord)
+        ordonnancesByDate[date].ordonnances.push(ord)
       }
     })
   })
@@ -139,9 +141,9 @@ const TableOrdonnance = ({ selectedPatient, consultations }: { selectedPatient: 
             </thead>
             <tbody>
               {Object.keys(ordonnancesByDate).length > 0 ? (
-                Object.entries(ordonnancesByDate).map(([date, ords]) => (
-                  <>
-                    <tr key={date} className='bg-gray-100 hover:bg-gray-200'>
+                Object.entries(ordonnancesByDate).map(([date, ordsObj]) => (
+                  <React.Fragment key={date}>
+                    <tr className='bg-gray-100 hover:bg-gray-200'>
                       <td colSpan={4}>
                         <div className='flex items-center justify-between px-4 py-2'>
                           <div className='flex items-center gap-2'>
@@ -167,7 +169,7 @@ const TableOrdonnance = ({ selectedPatient, consultations }: { selectedPatient: 
                                   <Plus
                                     className='text-blue-500 float-right cursor-pointer'
                                     onClick={() => {
-                                      const consultationId = ords[0]?.consultation_id
+                                      const consultationId = ordsObj.id_consultation
 
                                       setselectedConst(consultationId)
                                       handleOpenOrdModal()
@@ -177,7 +179,7 @@ const TableOrdonnance = ({ selectedPatient, consultations }: { selectedPatient: 
                               </tr>
                             </thead>
                             <tbody>
-                              {ords.map((ord, index) => (
+                              {ordsObj.ordonnances.map((ord, index) => (
                                 <tr key={index}>
                                   <td>{ord.medi}</td>
                                   <td>{ord.dosage}</td>
@@ -201,7 +203,7 @@ const TableOrdonnance = ({ selectedPatient, consultations }: { selectedPatient: 
                         </Collapse>
                       </td>
                     </tr>
-                  </>
+                  </React.Fragment>
                 ))
               ) : (
                 <tr>

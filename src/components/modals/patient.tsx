@@ -21,6 +21,13 @@ export default function PatientModal({
 }) {
   const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
   const userData = getStorageData('user')
+  const phoneCheck = (tel: any) => !/^[259]\d{7}$/.test(tel)
+
+  const ageCheck = (age: any) => {
+    const num = Number(age)
+
+    return !isNaN(num) && num >= 18 && num <= 60
+  }
 
   const [data, setData] = useState<any>({
     imageSrc: '/img/placeholder-image.jpg',
@@ -42,7 +49,9 @@ export default function PatientModal({
     mdp: false,
     email: false,
     tel: false,
+    telValid: false,
     age: false,
+    ageValid: false,
     id_ville: false,
     emailValid: false
   })
@@ -140,7 +149,9 @@ export default function PatientModal({
       mdp: false,
       email: false,
       tel: false,
+      telValid: false,
       age: false,
+      ageValid: false,
       id_ville: false,
       emailValid: false
     })
@@ -153,14 +164,19 @@ export default function PatientModal({
       const url = `${window.location.origin}/api/patient/${isAdd ? 'ajouter' : 'modifier'}`
 
       const newControls = {
-        // nom: data.nom.trim() === '',
-        // prenom: data.prenom.trim() === '',
-        // mdp: data.mdp.trim() === '',
-        // email: data.email.trim() === '',
-        // tel: data.tel.trim() === '',
-        // age: data.age.toString().trim() === '',
-        // id_ville: data.id_ville.toString().trim() === '',
-        // emailValid: mailCheck(data.email.trim())
+        nom: data.nom.trim() === '',
+        prenom: data.prenom.trim() === '',
+        email: data.email.trim() === '',
+
+        id_ville: data.id_ville.toString().trim() === '',
+        emailValid: mailCheck(data.email.trim()),
+
+        age: data.age.trim() === '',
+
+        // ageValid: ageCheck(data.age.trim()),
+
+        tel: data.tel.trim() === '',
+        telValid: phoneCheck(data.tel.trim())
       }
 
       setControls(newControls)
@@ -283,13 +299,21 @@ export default function PatientModal({
               <InputLabel>Ville</InputLabel>
               <Select
                 label='Ville'
-                className='h-12 md:h-[60px]'
+                className={`${controls?.id_ville === true ? 'isReq' : ''}`}
                 value={data?.id_ville ?? ''}
                 onChange={(e: any) => {
                   if (e === null) {
-                    setData({ ...data, id_ville: e.target.value })
+                    setControls({ ...controls, id_ville: true })
+                    setData((prev: any) => ({
+                      ...prev,
+                      id_ville: e.target.value
+                    }))
                   } else {
-                    setData({ ...data, id_ville: e.target.value })
+                    setControls({ ...controls, id_ville: false })
+                    setData((prev: any) => ({
+                      ...prev,
+                      id_ville: e.target.value
+                    }))
                   }
                 }}
               >
@@ -300,6 +324,7 @@ export default function PatientModal({
                 ))}
               </Select>
             </FormControl>
+            {controls?.id_ville === true ? <span className='errmsg'>Veuillez sélectionner la ville!</span> : null}
           </Grid>
 
           <Grid item xs={6} md={6}>
@@ -374,27 +399,30 @@ export default function PatientModal({
           <Grid item xs={6} md={6}>
             <TextField
               fullWidth
-              label='Téléphone'
+              label='Numéro de téléphone'
               value={data?.tel ?? ''}
-              className={`${controls?.tel === true ? 'isReq' : ''}`}
+              className={`${controls?.tel === true || controls.telValid === true ? 'isReq' : ''}`}
               onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, tel: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    tel: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, tel: false })
-                  setData((prev: any) => ({
-                    ...prev,
-                    tel: e.target.value
-                  }))
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = phoneCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, tel: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  tel: isEmpty,
+                  telValid: !isEmpty && isInvalid
+                }))
+              }}
+              InputLabelProps={{
+                sx: {
+                  fontSize: '1rem'
                 }
               }}
               InputProps={{
                 sx: {
-                  height: 60,
+                  height: 60, // md and up
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -403,32 +431,42 @@ export default function PatientModal({
                 }
               }}
             />
-            {controls?.tel === true ? <span className='errmsg'>Veuillez saisir le numéro de téléphone !</span> : null}
+
+            {controls?.tel === true ? (
+              <span className='errmsg'>Veuillez saisir le numéro de téléphone !</span>
+            ) : controls.telValid === true ? (
+              <span className='errmsg'>
+                Numéro de téléphone invalide : il doit contenir 8 chiffres et commencer par 2, 5 ou 9
+              </span>
+            ) : null}
           </Grid>
           <Grid item xs={6} md={6}>
             <TextField
               fullWidth
               label='Âge'
               value={data?.age ?? ''}
-              className={`${controls?.age === true ? 'isReq' : ''}`}
+              className={`${controls?.age === true || controls.ageValid === true ? 'isReq' : ''}`}
               onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, age: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    age: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, age: false })
-                  setData((prev: any) => ({
-                    ...prev,
-                    age: e.target.value
-                  }))
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = ageCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, age: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  age: isEmpty,
+                  ageValid: !isEmpty && !isInvalid
+                }))
+              }}
+              InputLabelProps={{
+                sx: {
+                  fontSize: '1rem'
                 }
               }}
               InputProps={{
                 sx: {
                   height: 60,
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -437,7 +475,11 @@ export default function PatientModal({
                 }
               }}
             />
-            {controls?.age === true ? <span className='errmsg'>Veuillez saisir l’age !</span> : null}
+            {controls?.age === true ? (
+              <span className='errmsg'>Veuillez saisir l’age !</span>
+            ) : controls.ageValid === true ? (
+              <span className='errmsg'>Âge invalide : il doit être un nombre entre 18 et 60 ans</span>
+            ) : null}
           </Grid>
           <Grid item xs={12} md={12}>
             <TextField

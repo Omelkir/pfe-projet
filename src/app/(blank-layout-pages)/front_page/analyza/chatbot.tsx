@@ -8,7 +8,7 @@ import ChatbotIcon from './ChatbotIcon'
 import { getStorageData } from '@/utils/helpersFront'
 import ConnModal from '@/components/modals/conOblig'
 
-const GEMINI_API_KEY = ''
+const GEMINI_API_KEY = 'AIzaSyBZ9zq29OVYpcokmaR3nghpGSfbDC6WGd8'
 
 type ChatMessageType = {
   role: 'user' | 'model'

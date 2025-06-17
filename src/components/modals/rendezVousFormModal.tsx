@@ -140,6 +140,16 @@ export default function RendezVousModal({
                 InputLabelProps={{ sx: { fontSize: '1rem' } }}
                 className={controls.date ? 'isReq' : ''}
                 value={data?.date || ''}
+                InputProps={{
+                  sx: {
+                    height: 60,
+                    '&.Mui-focused': {
+                      '& + .MuiInputLabel-root': {
+                        fontSize: '1rem'
+                      }
+                    }
+                  }
+                }}
                 inputProps={{
                   min: maxDateTime
                 }}

@@ -43,9 +43,9 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={6} lg={6}>
         <AppointmentChart />
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <Table />
-      </Grid>
+      </Grid> */}
     </Grid>
   ) : typeOfLogger === 2 ? (
     <Grid container spacing={6}>
@@ -64,9 +64,9 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={6} lg={6}>
         <AppointmentChart />
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <Table />
-      </Grid>
+      </Grid> */}
     </Grid>
   ) : typeOfLogger === 1 ? (
     <Grid container spacing={6}>
@@ -89,9 +89,9 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={6} lg={6}>
         <AppointmentChart />
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <Table />
-      </Grid>
+      </Grid> */}
     </Grid>
   ) : (
     <div></div>

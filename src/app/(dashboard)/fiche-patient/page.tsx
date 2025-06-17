@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 
 import { useSearchParams } from 'next/navigation'
 
-import { Card, CardContent, FormControl, Grid, InputLabel, MenuItem, Select } from '@mui/material'
+import { Autocomplete, Card, CardContent, Grid, TextField } from '@mui/material'
 
 import * as Tabs from '@radix-ui/react-tabs'
 
@@ -172,11 +172,6 @@ const Patient = () => {
     }
   }
 
-  const handleConfirmDeleteOrdonnance = async () => {
-    await handleDeleteOrdonnance(selected)
-    setIsDeleteModalOpenOrd(false)
-  }
-
   return (
     <div>
       <Card className='min-h-screen'>
@@ -184,31 +179,23 @@ const Patient = () => {
           <Arrow title='Dashboard' subTitle='Fiche Patient ' />
 
           {idFiche === null && (
-            <Grid item xs={12} md={12} className='mt-12'>
-              <FormControl fullWidth>
-                <InputLabel>Patient</InputLabel>
-                <Select
-                  label='Patient'
-                  className='w-1/3'
-                  value={data?.patient || null}
-                  onChange={(e: any) => {
-                    setData((prev: any) => ({
-                      ...prev,
-                      patient: e.target.value
-                    }))
-                    const patient = patientListe.find(p => p.id === e.target.value)
-
-                    setSelectedPatient(patient || null)
-                  }}
-                >
-                  {patientListe.map((item: any, i: number) => (
-                    <MenuItem value={item.id} key={item.id}>
-                      {item.nom + ' ' + item.prenom}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+            <div className='flex-1'>
+              <Autocomplete
+                className='w-1/3'
+                options={patientListe}
+                getOptionLabel={(option: any) => `${option.nom} ${option.prenom}`}
+                value={patientListe.find(p => p.id === data?.patient) || null}
+                onChange={(event, newValue) => {
+                  setData((prev: any) => ({
+                    ...prev,
+                    patient: newValue?.id || null
+                  }))
+                  setSelectedPatient(newValue || null)
+                }}
+                renderInput={params => <TextField {...params} label='Patient' variant='outlined' fullWidth />}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+              />
+            </div>
           )}
 
           <div className='w-full rounded-lg mt-12'>
@@ -368,7 +355,7 @@ const Patient = () => {
         <DeleteModal
           isOpen={isDeleteModalOpenOrd}
           onClose={() => setIsDeleteModalOpenOrd(false)}
-          onConfirm={handleConfirmDeleteOrdonnance}
+          onConfirm={handleOpenDeleteModalOrd}
           label={`cette ordonnance`}
         />
       </Card>

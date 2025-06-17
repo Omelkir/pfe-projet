@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 
-import { Button, Card, CardContent, Grid } from '@mui/material'
+import { useRouter } from 'next/navigation'
+
+import { Button, Card, CardContent, Grid, Link } from '@mui/material'
 import { IconUserPlus } from '@tabler/icons-react'
 
 import { toast } from 'react-toastify'
@@ -15,54 +17,18 @@ import DeleteModal from '@/components/modals/deleteModal/deleteModal'
 
 const Patient = ({}: any) => {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selected, setSelected] = useState<any>(null)
   const [update, setUpdate] = useState<string>('')
+  const router = useRouter()
 
   const handleOpenPatientModal = (patient: any = null) => {
     setSelected(patient)
     setIsPatientModalOpen(true)
   }
 
-  const handleOpenDeleteModal = (patient: any = null) => {
-    setSelected(patient)
-    setIsDeleteModalOpen(true)
-  }
-
-  const handleDelete = async (row: any) => {
-    const id = row?.id
-
-    if (!id) return console.error('ID manquant pour la suppression')
-
-    try {
-      const url = `${window.location.origin}/api/patient/supprimer?id=${id}`
-
-      const response = await fetch(url, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      const result = await response.json()
-
-      if (result.erreur) {
-        console.error('Erreur:', result.message)
-      } else {
-        setUpdate(Date.now().toString())
-        toast.success('Le compte a été supprimé avec succès')
-      }
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
-    }
-  }
-
-  const handleConfirmDelete = async () => {
-    await handleDelete(selected)
-    setIsDeleteModalOpen(false)
-  }
-
   return (
     <div>
-      <Card>
+      <Card className='min-h-screen'>
         <CardContent>
           <Arrow title='Dashboard' subTitle='Patient' />
 
@@ -75,6 +41,16 @@ const Patient = ({}: any) => {
           >
             <IconUserPlus className='mr-2' /> Ajouter
           </Button>
+          <div className='flex justify-end mb-3'>
+            <Link
+              className='underline cursor-pointer'
+              onClick={() => {
+                router.push('/archive-patient')
+              }}
+            >
+              Liste des patients archivés
+            </Link>
+          </div>
 
           <PatientModal
             isOpen={isPatientModalOpen}
@@ -83,15 +59,8 @@ const Patient = ({}: any) => {
             setUpdate={setUpdate}
           />
 
-          <DeleteModal
-            isOpen={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-            onConfirm={handleConfirmDelete}
-            label={`le patient ${selected?.prenom + ' '}  ${selected?.nom}`}
-          />
-
           <Grid item xs={12}>
-            <Table onEditPatient={handleOpenPatientModal} onDeletePatient={handleOpenDeleteModal} update={update} />
+            <Table onEditPatient={handleOpenPatientModal} update={update} setUpdate={setUpdate} />
           </Grid>
         </CardContent>
       </Card>

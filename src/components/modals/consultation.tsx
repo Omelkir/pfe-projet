@@ -80,6 +80,18 @@ export default function ConsultationModal({
 
   const handleSave = async () => {
     try {
+      const newControls = {
+        id_patient: data.id_patient === 0,
+        date: data.date.trim() === '',
+        duree: data.duree === 0
+      }
+
+      setControls(newControls)
+
+      if (Object.values(newControls).some(value => value)) {
+        return
+      }
+
       const payload = {
         ...data,
         id_el: userData?.id,
@@ -125,7 +137,7 @@ export default function ConsultationModal({
   }, [dataUp])
 
   const now = new Date()
-  const maxDateTime = now.toISOString().slice(0, 16) // format 'YYYY-MM-DDTHH:mm'
+  const maxDateTime = now.toISOString().slice(0, 16)
 
   return (
     <Modal
@@ -163,10 +175,10 @@ export default function ConsultationModal({
             <FormControl fullWidth>
               <InputLabel>Patient</InputLabel>
               <Select
-                label='patient'
+                label='Patient'
                 key={'test21'}
-                className={`${controls?.id_patient === true ? 'isReq' : ''}`}
                 value={data?.id_patient ?? ''}
+                className={`${controls?.id_patient === true ? 'isReq' : ''}`}
                 onChange={(e: any) => {
                   if (e === null) {
                     setControls({ ...controls, id_patient: true })
@@ -199,8 +211,18 @@ export default function ConsultationModal({
               fullWidth
               type='datetime-local'
               InputLabelProps={{ sx: { fontSize: '1rem' } }}
-              className={controls.date ? 'isReq' : ''}
               value={data?.date || ''}
+              className={`mb-1 ${controls?.id_patient === true ? 'isReq' : ''}`}
+              InputProps={{
+                sx: {
+                  height: 60,
+                  '&.Mui-focused': {
+                    '& + .MuiInputLabel-root': {
+                      fontSize: '1rem'
+                    }
+                  }
+                }
+              }}
               inputProps={{
                 min: maxDateTime
               }}

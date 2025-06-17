@@ -1,81 +1,78 @@
-// Next Imports
+'use client'
+
+import { useEffect, useState } from 'react'
+
 import dynamic from 'next/dynamic'
 
-// MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 
 import type { ApexOptions } from 'apexcharts'
 
-// Styled Component Imports
-const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
+import { getStorageData } from '@/utils/helpers'
 
-// Vars
-const series = [
-  {
-    name: 'New Patients',
-    data: [30, 40, 35, 50, 49, 60, 70, 91, 125, 100, 110, 120]
-  },
-  {
-    name: 'Return Patients',
-    data: [20, 30, 25, 40, 39, 50, 60, 81, 105, 90, 100, 110]
-  }
-]
+// Chart Component
+const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'), { ssr: false })
 
 const PatientChart = () => {
-  const primaryColor = '#16b1ff'
-  const secondaryColor = 'var(--mui-palette-secondary-main)'
+  const [series, setSeries] = useState([{ name: 'Total Patients', data: Array(12).fill(0) }])
+  const userData = getStorageData('user')
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const url = `${window.location.origin}/api/patient/liste?id_el=${userData.id}&el=${userData.role}`
+        const response = await fetch(url)
+        const res = await response.json()
+
+        console.log('res', res)
+
+        if (!res.erreur && Array.isArray(res.data)) {
+          const monthlyCount = Array(12).fill(0)
+
+          res.data.forEach((patient: any) => {
+            const month = new Date(patient.date).getMonth()
+
+            monthlyCount[month] += 1
+          })
+
+          setSeries([{ name: 'Total Patients', data: monthlyCount }])
+        }
+      } catch (error) {
+        console.error('Erreur chargement patients:', error)
+      }
+    }
+
+    fetchPatients()
+  }, [])
 
   const options: ApexOptions = {
-    chart: {
-      type: 'line',
-      height: 350,
-      toolbar: { show: false }
-    },
-    colors: [primaryColor, secondaryColor],
-    stroke: {
-      width: 3,
-      curve: 'smooth'
-    },
-    markers: {
-      size: 5
-    },
+    chart: { type: 'line', height: 350, toolbar: { show: false } },
+    colors: ['#16b1ff'],
+    stroke: { width: 3, curve: 'smooth' },
+    markers: { size: 5 },
     xaxis: {
       categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-      labels: {
-        style: {
-          colors: 'var(--mui-palette-text-secondary)'
-        }
-      }
+      labels: { style: { colors: 'var(--mui-palette-text-secondary)' } }
     },
-    yaxis: {
-      labels: {
-        style: {
-          colors: 'var(--mui-palette-text-secondary)'
-        }
-      }
-    },
+    yaxis: { labels: { style: { colors: 'var(--mui-palette-text-secondary)' } } },
     legend: {
       position: 'top',
       horizontalAlign: 'right',
-      labels: {
-        colors: 'var(--mui-palette-text-primary)'
-      }
+      labels: { colors: 'var(--mui-palette-text-primary)' }
     },
-    grid: {
-      borderColor: 'var(--mui-palette-divider)'
-    }
+    grid: { borderColor: 'var(--mui-palette-divider)' }
   }
 
   return (
     <Card>
       <CardContent>
-        <Typography variant='h6' gutterBottom style={{ fontSize: 20, fontWeight: 'bold', color: '#16b1ff' }}>
-          Patients
+        <Typography variant='h6' gutterBottom sx={{ fontSize: 20, fontWeight: 'bold', color: '#16b1ff' }}>
+          Évolution des Patients
         </Typography>
         <Typography variant='body2' color='text.secondary' gutterBottom>
-          20% higher than last year.
+          Nombre total de patients par mois
         </Typography>
         <AppReactApexCharts type='line' height={350} options={options} series={series} />
       </CardContent>

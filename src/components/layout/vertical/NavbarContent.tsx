@@ -75,7 +75,7 @@ const NavbarContent = () => {
 
   async function getNotification(id: any) {
     try {
-      const url = `${window.location.origin}/api/notification/get-notification?id_recepteur=${id}`
+      const url = `${window.location.origin}/api/notification/get-notification?id_recepteur=${id}&el=${userData?.role}&vu=0`
 
       const requestOptions = {
         method: 'GET',
@@ -119,7 +119,7 @@ const NavbarContent = () => {
   useEffect(() => {
     const interval = setInterval(async () => {
       await getNotification(userData?.id)
-    }, 1000)
+    }, 30000)
 
     return () => clearInterval(interval)
   }, [])

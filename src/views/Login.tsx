@@ -1,7 +1,5 @@
 'use client'
 
-
-
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 
@@ -15,7 +13,6 @@ import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 
 import Button from '@mui/material/Button'
-
 
 // Type Imports
 import { Box } from '@mui/material'
@@ -43,6 +40,7 @@ const Login = () => {
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [data, setData] = useState<any>({ email: '', mdp: '' })
   const [typeOfLogger, setTypeOfLogger] = useState<number>(-1)
+  const [loginError, setLoginError] = useState<string>('')
 
   const [controls, setControls] = useState<any>({
     email: false,
@@ -67,6 +65,12 @@ const Login = () => {
       const result = await response.json()
 
       if (!result.erreur) {
+        if (result.statusApprove === 'nonApprove') {
+          setLoginError('notApproved')
+
+          return
+        }
+
         setStorageData('typeOfLogger', result.role)
         setStorageData('user', result.user)
         router.push('/')
@@ -97,7 +101,7 @@ const Login = () => {
       {/* Formulaire */}
       <div className='flex flex-col justify-center items-center w-full max-w-xl p-12 min-h-screen space-y-6'>
         <div className='mb-5'>
-          <h3 className='text-3xl font-bold mb-3'>Bienvenue sur MediConnect ! ! 👋🏻</h3>
+          <h3 className='text-3xl font-bold mb-3'>Bienvenue sur MediConnect ! 👋🏻</h3>
           <Typography className='mbs-1 text-lg '>
             Veuillez vous connecter à votre compte et commencer l’aventure
           </Typography>
@@ -109,7 +113,12 @@ const Login = () => {
               <p className='posErreur'>Email ou mot de passe incorrect, veuillez réessayer</p>
             </div>
           ) : null}
-
+          {loginError === 'notApproved' && (
+            <div className='err flex items-center text-red-600 mb-3'>
+              <IconExclamationCircle stroke={2} />
+              <p className='ml-2'>Votre compte n’est pas encore accepté par l’administrateur.</p>
+            </div>
+          )}
           <div>
             <TextField
               value={data.email}

@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer'
+
 import pool from '@/utils/connexion'
 
 export const updateApprovalMedecin = async (body: any) => {
@@ -74,7 +76,15 @@ export const updateApprovalPatient = async (body: any) => {
 
 export const updateApprovalConsultation = async (body: any) => {
   try {
-    const { id_el, el, id, id_patient } = body
+    const { id_el, el, id, id_patient, email, nom, prenom } = body
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'mediconnect048@gmail.com',
+        pass: 'gkka ctir ardv fyea'
+      }
+    })
 
     if (!id) {
       return { erreur: true, message: 'Paramètres invalides' }
@@ -89,7 +99,7 @@ export const updateApprovalConsultation = async (body: any) => {
 
     if (rows?.length === 0) {
       await pool.query(
-        `INSERT INTO medi_connect.relation_patient (el, id_el, id_patient) VALUES ('${el}','${id_el}','${id_patient}')`
+        `INSERT INTO medi_connect.relation_patient (el, id_el, id_patient,date) VALUES ('${el}','${id_el}','${id_patient}',CURDATE()))`
       )
     }
 
@@ -100,6 +110,26 @@ export const updateApprovalConsultation = async (body: any) => {
     `
 
     await pool.query(sql, [id])
+
+    const mailOptions = {
+      from: '"MediConnect" <mediconnect048@gmail.com>',
+      to: email,
+      subject: 'Confirmation de votre rendez-vous',
+      html: `
+    <p>Bonjour <strong>${nom} ${prenom}</strong>,</p>
+
+    <p>Nous avons le plaisir de vous informer que votre rendez-vous a été <strong>accepté</strong>.</p>
+
+    <p>Merci d’avoir choisi <strong>MediConnect</strong> pour la gestion de vos soins de santé.</p>
+
+    <p>Nous restons à votre disposition pour toute information complémentaire.</p>
+
+    <p>Cordialement,<br>
+    L'équipe <strong>MediConnect</strong></p>
+  `
+    }
+
+    await transporter.sendMail(mailOptions)
 
     return { erreur: false, data: true }
   } catch (error) {
