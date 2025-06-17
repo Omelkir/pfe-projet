@@ -35,22 +35,16 @@ const TableArchive = ({
   const [isLoading, setIsLoading] = useState(false)
 
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null)
+  const [selectedMedecinId, setSelectedMedecinId] = useState<number | null>(null)
 
   const onPagination = (e: any) => {
-    getPatientArchiveList(e)
+    getMedecinArchiveList(e)
   }
 
-  async function getPatientArchiveList(page = 1) {
+  async function getMedecinArchiveList(page = 1) {
     try {
       setIsLoading(true)
-      let url = ''
-
-      if (userData?.role === 1) {
-        url = `${window.location.origin}/api/patient/compte-patient?approuve=0&archive=1&page=${page}`
-      } else {
-        url = `${window.location.origin}/api/patient/liste?id_el=${userData.id}&el=${userData.role}&archive=1&page=${page}`
-      }
+      const url = `${window.location.origin}/api/medecin/liste?approuve=0&archive=1&page=${page}`
 
       const requestOptions = {
         method: 'GET',
@@ -77,14 +71,12 @@ const TableArchive = ({
   }
 
   useEffect(() => {
-    getPatientArchiveList()
+    getMedecinArchiveList()
   }, [update])
 
   const handleChange = async (id: number) => {
     try {
-      const endpoint = userData?.role === 1 ? '/api/archive/active-patient' : '/api/archive/unarchived'
-
-      const response = await fetch(`${window.location.origin}${endpoint}`, {
+      const response = await fetch(`${window.location.origin}/api/archive/active-medecin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
@@ -95,7 +87,7 @@ const TableArchive = ({
       if (!response.ok || result.erreur) {
         toast.error('Erreur !')
       } else {
-        toast.success('Le patient a été désarchivé avec succès')
+        toast.success('Le médecin a été désarchivé avec succès')
         setUpdate(Date.now().toString())
       }
     } catch (err) {
@@ -110,10 +102,10 @@ const TableArchive = ({
           <table className={tableStyles.table}>
             <thead>
               <tr>
-                <th>Nom</th>
-                <th>Prenom</th>
+                <th>Nom Utilisateur</th>
                 <th>Email</th>
-                <th>Téléphone</th>
+                <th>Ville</th>
+                <th>Spéciallité</th>
                 <th className='text-center'>Action</th>
               </tr>
             </thead>
@@ -132,24 +124,24 @@ const TableArchive = ({
                         <CustomAvatar src={row.image} size={34} />
                         <div className='flex flex-col'>
                           <Typography color='text.primary' className='font-medium'>
-                            {row.nom}
+                            {row.nom_ut}
                           </Typography>
                         </div>
                       </div>
                     </td>
                     <td className='!plb-1'>
-                      <Typography>{row.prenom}</Typography>
-                    </td>
-                    <td className='!plb-1'>
                       <Typography>{row.email}</Typography>
                     </td>
                     <td className='!plb-1'>
-                      <Typography>{row.tel}</Typography>
+                      <Typography>{row.ville}</Typography>
+                    </td>
+                    <td className='!plb-1'>
+                      <Typography>{row.spe}</Typography>
                     </td>
                     <td className='flex justify-center gap-2'>
                       <button
                         onClick={() => {
-                          setSelectedPatientId(row.id)
+                          setSelectedMedecinId(row.id)
                           setConfirmOpen(true)
                         }}
                         className='ri-inbox-unarchive-fill text-yellow-500 text-xl hover:text-2xl'
@@ -185,7 +177,7 @@ const TableArchive = ({
 
         <DialogContent dividers className='mb-3 text-center'>
           <Typography color='text.secondary'>
-            Êtes-vous sûr de vouloir <strong>désarchiver ce patient</strong> ?
+            Êtes-vous sûr de vouloir <strong>désarchiver ce médecin</strong> ?
           </Typography>
         </DialogContent>
 
@@ -202,12 +194,12 @@ const TableArchive = ({
             size='small'
             color='warning'
             onClick={async () => {
-              if (selectedPatientId !== null) {
-                await handleChange(selectedPatientId)
+              if (selectedMedecinId !== null) {
+                await handleChange(selectedMedecinId)
               }
 
               setConfirmOpen(false)
-              setSelectedPatientId(null)
+              setSelectedMedecinId(null)
             }}
           >
             Confirmer

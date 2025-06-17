@@ -46,12 +46,12 @@ const Table = ({
   async function getPatientList(page = 1) {
     try {
       setIsLoading(true)
-      let url = `${window.location.origin}/api/patient/liste`
+      let url = ''
 
-      if (userData.role === 2 || userData.role === 3) {
-        url += `?id_el=${userData.id}&el=${userData.role}&page=${page}`
+      if (userData?.role === 1) {
+        url = `${window.location.origin}/api/patient/compte-patient?approuve=1&archive=0&page=${page}`
       } else {
-        url += `?page=${page}&el=${userData.role}`
+        url = `${window.location.origin}/api/patient/liste?id_el=${userData.id}&el=${userData.role}&page=${page}`
       }
 
       const requestOptions = {
@@ -86,7 +86,9 @@ const Table = ({
 
   const handleChange = async (id: number) => {
     try {
-      const response = await fetch(`${window.location.origin}/api/archive-patient/archived`, {
+      const endpoint = userData?.role === 1 ? '/api/archive/desactive-patient' : '/api/archive/archived'
+
+      const response = await fetch(`${window.location.origin}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
@@ -96,11 +98,13 @@ const Table = ({
 
       if (!response.ok || result.erreur) {
         toast.error('Erreur !')
+        console.error('Erreur API:', result)
       } else {
         toast.success('Le patient a été archivé avec succès')
         setUpdate(Date.now().toString())
       }
     } catch (err) {
+      console.error('Erreur fetch:', err)
       toast.error('Erreur !')
     }
   }

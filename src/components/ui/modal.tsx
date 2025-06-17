@@ -39,7 +39,7 @@ export function Modal({
       <div className='fixed inset-0 z-50 flex items-center justify-center'>
         <div className='absolute inset-0 bg-black/10 backdrop-blur-sm' onClick={handleClose} />
 
-        <div className='relative z-50 w-full sm:max-w-lg md:max-w-lg bg-white rounded-lg shadow-lg'>
+        <div className='relative z-50 w-full sm:max-w-lg md:max-w-lg bg-white rounded-lg shadow-lg max-h-[90vh] overflow-y-auto'>
           {(title || description) && (
             <div className='p-4'>
               {title && <div className='text-xl text-black'>{title}</div>}

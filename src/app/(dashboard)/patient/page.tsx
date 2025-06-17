@@ -7,13 +7,9 @@ import { useRouter } from 'next/navigation'
 import { Button, Card, CardContent, Grid, Link } from '@mui/material'
 import { IconUserPlus } from '@tabler/icons-react'
 
-import { toast } from 'react-toastify'
-
 import Arrow from '@/views/dashboard/Arrow'
 import PatientModal from '@/components/modals/patient'
 import Table from './Table'
-
-import DeleteModal from '@/components/modals/deleteModal/deleteModal'
 
 const Patient = ({}: any) => {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false)

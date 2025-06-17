@@ -19,26 +19,34 @@ export default function LaboratoireModal({
   setUpdate: any
 }) {
   const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
+  const addressCheck = (address: string) => !/^[\wÀ-ÿ0-9\s,.'\-]{5,100}$/.test(address.trim())
 
   const [data, setData] = useState<any>({
     imageSrc: '/img/placeholder-image.jpg',
     image: '',
     email: '',
-    id_ville: '',
+    id_ville: 0,
     heurD: '',
     heurF: '',
     info: '',
-    nom_ut: ''
+    nom_ut: '',
+    mode_pre: 0,
+    adresse: ''
   })
 
   const [controls, setControls] = useState<any>({
+    adresse: false,
+    addressValid: false,
     email: false,
     emailValid: false,
-    nom_ut: false
+    nom_ut: false,
+    mode_pre: false,
+    heurD: false,
+    heurF: false,
+    id_ville: false
   })
 
   const [villeListe, setVilleListe] = useState<any[]>([])
-  const [serListe, setSerListe] = useState<any[]>([])
 
   async function getVilleList() {
     try {
@@ -72,38 +80,6 @@ export default function LaboratoireModal({
     getVilleList()
   }, [])
 
-  async function getSerList() {
-    try {
-      const url = `${window.location.origin}/api/service/liste?getall`
-
-      const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      }
-
-      const response = await fetch(url, requestOptions)
-
-      if (!response.ok) throw new Error('Erreur lors de la requête')
-
-      const responseData = await response.json()
-
-      console.log('API Response:', responseData)
-
-      if (responseData.erreur) {
-        alert(responseData.message)
-      } else {
-        setSerListe(responseData.data)
-      }
-    } catch (error) {
-      console.error('Erreur:', error)
-      alert('Une erreur est survenue lors de la récupération des données.')
-    }
-  }
-
-  useEffect(() => {
-    getSerList()
-  }, [])
-
   const handleImageChange = (e: any) => {
     const file = e.target.files[0]
 
@@ -131,11 +107,13 @@ export default function LaboratoireModal({
         imageSrc: '/img/placeholder-image.jpg',
         image: '',
         email: '',
-        id_ville: '',
+        id_ville: 0,
         heurD: '',
         heurF: '',
         info: '',
-        nom_ut: ''
+        nom_ut: '',
+        mode_pre: 0,
+        adresse: ''
       })
     }
   }, [laboratoireData])
@@ -145,16 +123,24 @@ export default function LaboratoireModal({
       imageSrc: '/img/placeholder-image.jpg',
       image: '',
       email: '',
-      id_ville: '',
+      id_ville: 0,
       heurD: '',
       heurF: '',
       info: '',
-      nom_ut: ''
+      nom_ut: '',
+      mode_pre: 0,
+      adresse: ''
     })
     setControls({
+      adresse: false,
+      addressValid: false,
       email: false,
       emailValid: false,
-      nom_ut: false
+      nom_ut: false,
+      mode_pre: 0,
+      heurD: false,
+      heurF: false,
+      id_ville: false
     })
   }
 
@@ -167,7 +153,13 @@ export default function LaboratoireModal({
       const newControls = {
         email: data.email.trim() === '',
         emailValid: mailCheck(data.email.trim()),
-        nom_ut: data.nom_ut.trim() === ''
+        nom_ut: data.nom_ut.trim() === '',
+        mode_pre: data.mode_pre === 0,
+        id_ville: data.id_ville === 0,
+        heurD: data.heurD.trim() === '',
+        heurF: data.heurF.trim() === '',
+        adresse: data.adresse.trim() === '',
+        addressValid: addressCheck(data.adresse.trim())
       }
 
       setControls(newControls)
@@ -219,10 +211,17 @@ export default function LaboratoireModal({
     }
   }
 
+  const prelevListe = [
+    { label: 'Prélèvement à domicile', value: 1 },
+    { label: 'Prélèvement sur place au laboratoire', value: 2 },
+    { label: 'Prélèvement sur place au laboratoire et à domicile', value: 3 }
+  ]
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      className='flex justify-center items-center max-w-[300px]'
       title={<span className='block w-full text-center'>{isAdd ? 'Ajouter laboratoire' : 'Modifier laboratoire'}</span>}
       footer={
         <div className='flex justify-end gap-2'>
@@ -321,11 +320,14 @@ export default function LaboratoireModal({
               fullWidth
               label='Email'
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
+                sx: {
+                  fontSize: '1rem'
+                }
               }}
               InputProps={{
                 sx: {
                   height: 60,
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -336,20 +338,16 @@ export default function LaboratoireModal({
               value={data?.email ?? ''}
               className={`${controls?.email === true || controls.emailValid === true ? 'isReq' : ''}`}
               onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, email: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    email: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, email: false })
-                  setControls({ ...controls, emailValid: mailCheck(e.target.value.trim()) })
-                  setData((prev: any) => ({
-                    ...prev,
-                    email: e.target.value
-                  }))
-                }
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = mailCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, email: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  email: isEmpty,
+                  emailValid: !isEmpty && isInvalid
+                }))
               }}
             />
             {controls?.email === true ? (
@@ -360,25 +358,71 @@ export default function LaboratoireModal({
               </span>
             ) : null}
           </Grid>
+          <Grid item xs={6} md={6}>
+            <FormControl fullWidth>
+              <InputLabel>Mode de prélèvement</InputLabel>
+              <Select
+                label='Mode de prélèvement'
+                className={`${controls?.mode_pre === true ? 'isReq' : ''}`}
+                value={data?.mode_pre || null}
+                onChange={(e: any) => {
+                  if (e === null) {
+                    setControls({ ...controls, mode_pre: true })
+                    setData((prev: any) => ({
+                      ...prev,
+                      mode_pre: e.target.value
+                    }))
+                  } else {
+                    setControls({ ...controls, mode_pre: false })
+                    setData((prev: any) => ({
+                      ...prev,
+                      mode_pre: e.target.value
+                    }))
+                  }
+                }}
+              >
+                {prelevListe.map((item: any) => (
+                  <MenuItem value={item.value} key={item.value}>
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {controls?.mode_pre === true ? (
+              <span className='errmsg'>Veuillez sélectionner le mode de prélèvement!</span>
+            ) : null}
+          </Grid>
 
           <Grid item xs={6} md={6}>
             <TextField
               fullWidth
               type='time'
+              className={`${controls?.heurD === true ? 'isReq' : ''}`}
               value={data?.heurD ?? ''}
               onChange={(e: any) => {
-                setData((prev: any) => ({
-                  ...prev,
-                  heurD: e.target.value
-                }))
+                if (e.target?.value.trim() === '') {
+                  setControls({ ...controls, heurD: true })
+                  setData((prev: any) => ({
+                    ...prev,
+                    heurD: e.target.value
+                  }))
+                } else {
+                  setControls({ ...controls, heurD: false })
+                  setData((prev: any) => ({
+                    ...prev,
+                    heurD: e.target.value
+                  }))
+                }
               }}
-              autoFocus
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
+                sx: {
+                  fontSize: '1rem'
+                }
               }}
               InputProps={{
                 sx: {
                   height: 60,
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -387,25 +431,40 @@ export default function LaboratoireModal({
                 }
               }}
             />
+            {controls?.heurD === true ? (
+              <span className='errmsg'>Veuillez sélectionner l’heure de début de travail !</span>
+            ) : null}
           </Grid>
           <Grid item xs={6} md={6}>
             <TextField
               fullWidth
               type='time'
+              className={`${controls?.heurF === true ? 'isReq' : ''}`}
               value={data?.heurF ?? ''}
               onChange={(e: any) => {
-                setData((prev: any) => ({
-                  ...prev,
-                  heurF: e.target.value
-                }))
+                if (e.target?.value.trim() === '') {
+                  setControls({ ...controls, heurF: true })
+                  setData((prev: any) => ({
+                    ...prev,
+                    heurF: e.target.value
+                  }))
+                } else {
+                  setControls({ ...controls, heurF: false })
+                  setData((prev: any) => ({
+                    ...prev,
+                    heurF: e.target.value
+                  }))
+                }
               }}
-              autoFocus
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
+                sx: {
+                  fontSize: '1rem'
+                }
               }}
               InputProps={{
                 sx: {
                   height: 60,
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -414,29 +473,87 @@ export default function LaboratoireModal({
                 }
               }}
             />
+            {controls?.heurF === true ? (
+              <span className='errmsg'>Veuillez sélectionner l’heure de fin de travail !</span>
+            ) : null}
           </Grid>
-
-          <Grid item xs={12} md={12}>
+          <Grid item xs={6} md={6}>
             <FormControl fullWidth>
               <InputLabel>Ville</InputLabel>
               <Select
                 label='Ville'
-                value={data?.id_ville ?? ''}
+                className={`${controls?.id_ville === true ? 'isReq' : ''}`}
+                value={data?.id_ville || null}
                 onChange={(e: any) => {
                   if (e === null) {
-                    setData({ ...data, id_ville: e.target.value })
+                    setControls({ ...controls, id_ville: true })
+                    setData((prev: any) => ({
+                      ...prev,
+                      id_ville: e.target.value
+                    }))
                   } else {
-                    setData({ ...data, id_ville: e.target.value })
+                    setControls({ ...controls, id_ville: false })
+                    setData((prev: any) => ({
+                      ...prev,
+                      id_ville: e.target.value
+                    }))
                   }
                 }}
               >
-                {villeListe.map(item => (
+                {villeListe.map((item: any) => (
                   <MenuItem value={item.id} key={item.id}>
                     {item.ville}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
+            {controls?.id_ville === true ? <span className='errmsg'>Veuillez sélectionner la ville!</span> : null}
+          </Grid>
+          <Grid item xs={6} md={6}>
+            <TextField
+              fullWidth
+              label='Adresse'
+              InputLabelProps={{
+                sx: {
+                  fontSize: '1rem'
+                }
+              }}
+              InputProps={{
+                sx: {
+                  height: 60,
+                  fontSize: '1rem',
+                  '&.Mui-focused': {
+                    '& + .MuiInputLabel-root': {
+                      fontSize: '1rem'
+                    }
+                  }
+                }
+              }}
+              value={data?.adresse ?? ''}
+              className={`${controls?.adresse === true || controls.addressValid === true ? 'isReq' : ''}`}
+              onChange={(e: any) => {
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = addressCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, adresse: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  adresse: isEmpty,
+                  addressValid: !isEmpty && isInvalid
+                }))
+              }}
+            />
+            {controls?.adresse === true ? (
+              <span className='errmsg'>Veuillez saisir l’adresse !</span>
+            ) : controls.addressValid === true ? (
+              <span className='errmsg'>
+                <span className='errmsg'>
+                  Adresse invalide : elle doit contenir au moins 5 caractères et ne pas inclure de symboles spéciaux non
+                  autorisés.
+                </span>
+              </span>
+            ) : null}
           </Grid>
 
           <Grid item xs={12} md={12}>

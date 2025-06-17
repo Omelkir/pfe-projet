@@ -14,7 +14,7 @@ import pool from '@/utils/connexion'
 function genererMotDePasse(): string {
   const lettres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
   const chiffres = '0123456789'
-  const caracteresSpeciaux = '&#'
+  const caracteresSpeciaux = '&'
   const tous = lettres + chiffres + caracteresSpeciaux
 
   let motDePasse = ''
@@ -23,12 +23,10 @@ function genererMotDePasse(): string {
   motDePasse += chiffres[Math.floor(Math.random() * chiffres.length)]
   motDePasse += caracteresSpeciaux[Math.floor(Math.random() * caracteresSpeciaux.length)]
 
-  // Ajouter les caractères restants (au total 10)
   for (let i = 3; i < 10; i++) {
     motDePasse += tous[Math.floor(Math.random() * tous.length)]
   }
 
-  // Mélanger les caractères
   return motDePasse
     .split('')
     .sort(() => 0.5 - Math.random())
@@ -70,7 +68,7 @@ export const ajouter = async (req: any) => {
       service: 'gmail',
       auth: {
         user: 'mediconnect048@gmail.com',
-        pass: '***************'
+        pass: 'gkka ctir ardv fyea'
       }
     })
 
@@ -98,8 +96,7 @@ export const ajouter = async (req: any) => {
       '4',
       '${req.checkUrl}',
       '${json.id_ville}',
-      '${json.approuve}',
-      
+      '1',
       '${json.age}',
       '${json.tel}'
     )

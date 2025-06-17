@@ -28,10 +28,10 @@ const Register = () => {
   const tarifCheck = (tarif: any) => {
     const num = Number(tarif)
 
-    return !isNaN(tarif)
+    return isNaN(num) || num <= 0
   }
 
-  const addressCheck = (address: string) => /^[\wÀ-ÿ0-9\s,.'\-]{5,100}$/.test(address.trim())
+  const addressCheck = (address: string) => !/^[\wÀ-ÿ0-9\s,.'\-]{5,100}$/.test(address.trim())
 
   const passwordCheck = (password: any) =>
     !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
@@ -145,6 +145,7 @@ const Register = () => {
 
   const [controls, setControls] = useState<any>({
     adresse: false,
+    addressValid: false,
     email: false,
     mdp: false,
     conMdp: false,
@@ -199,6 +200,7 @@ const Register = () => {
     })
     setControls({
       adresse: false,
+      addressValid: false,
       email: false,
       mdp: false,
       conMdp: false,
@@ -663,6 +665,7 @@ const Register = () => {
                   <InputLabel>Spéciallité</InputLabel>
                   <Select
                     label='Spéciallité'
+                    value={data?.id_spe || null}
                     className={`${controls?.id_spe === true ? 'isReq' : ''}`}
                     onChange={(e: any) => {
                       if (e === null) {
@@ -698,6 +701,7 @@ const Register = () => {
                   fullWidth
                   label='Tarif'
                   value={data?.tarif ?? ''}
+                  className={`${controls?.tarif === true || controls.tarifValid === true ? 'isReq' : ''}`}
                   InputLabelProps={{
                     sx: {
                       fontSize: '1rem'
@@ -705,7 +709,7 @@ const Register = () => {
                   }}
                   InputProps={{
                     sx: {
-                      height: 60, // md and up
+                      height: 60,
                       fontSize: '1rem',
                       '&.Mui-focused': {
                         '& + .MuiInputLabel-root': {
@@ -714,7 +718,6 @@ const Register = () => {
                       }
                     }
                   }}
-                  className={`${controls?.tarif === true || controls.tarifValid === true ? 'isReq' : ''}`}
                   onChange={(e: any) => {
                     const value = e.target.value
                     const isEmpty = value.trim() === ''
@@ -724,7 +727,7 @@ const Register = () => {
                     setControls((prev: any) => ({
                       ...prev,
                       tarif: isEmpty,
-                      tarifValid: !isEmpty && !isInvalid
+                      tarifValid: isInvalid
                     }))
                   }}
                 />

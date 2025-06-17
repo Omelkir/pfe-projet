@@ -26,7 +26,7 @@ export default function PatientModal({
   const ageCheck = (age: any) => {
     const num = Number(age)
 
-    return !isNaN(num) && num >= 18 && num <= 60
+    return isNaN(num) || num <= 12
   }
 
   const [data, setData] = useState<any>({
@@ -167,13 +167,10 @@ export default function PatientModal({
         nom: data.nom.trim() === '',
         prenom: data.prenom.trim() === '',
         email: data.email.trim() === '',
-
         id_ville: data.id_ville.toString().trim() === '',
         emailValid: mailCheck(data.email.trim()),
-
         age: data.age.trim() === '',
-
-        // ageValid: ageCheck(data.age.trim()),
+        ageValid: ageCheck(data.age.trim()),
 
         tel: data.tel.trim() === '',
         telValid: phoneCheck(data.tel.trim())
@@ -455,7 +452,7 @@ export default function PatientModal({
                 setControls((prev: any) => ({
                   ...prev,
                   age: isEmpty,
-                  ageValid: !isEmpty && !isInvalid
+                  ageValid: isInvalid
                 }))
               }}
               InputLabelProps={{
@@ -478,9 +475,10 @@ export default function PatientModal({
             {controls?.age === true ? (
               <span className='errmsg'>Veuillez saisir l’age !</span>
             ) : controls.ageValid === true ? (
-              <span className='errmsg'>Âge invalide : il doit être un nombre entre 18 et 60 ans</span>
+              <span className='errmsg'>Âge invalide : il doit être un nombre supérieur à 12 ans</span>
             ) : null}
           </Grid>
+
           <Grid item xs={12} md={12}>
             <TextField
               fullWidth

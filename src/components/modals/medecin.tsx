@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 
 import { Button, FormControl, Grid, Input, InputLabel, MenuItem, Select, TextField } from '@mui/material'
@@ -20,23 +19,40 @@ export default function MedecinModal({
 }) {
   const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
 
+  const tarifCheck = (tarif: any) => {
+    const num = Number(tarif)
+
+    return isNaN(num) || num <= 0
+  }
+
+  const addressCheck = (address: string) => !/^[\wÀ-ÿ0-9\s,.'\-]{5,100}$/.test(address.trim())
+
   const [data, setData] = useState<any>({
     imageSrc: '/img/placeholder-image.jpg',
     image: '',
     email: '',
-    tarif: '',
-    id_ville: '',
+    id_ville: 0,
     heurD: '',
     heurF: '',
     info: '',
     nom_ut: '',
-    id_spe: ''
+    id_spe: 0,
+    tarif: '',
+    adresse: ''
   })
 
   const [controls, setControls] = useState<any>({
+    nom_ut: false,
     email: false,
     emailValid: false,
-    nom_ut: false
+    id_spe: false,
+    tarif: false,
+    tarifValid: false,
+    id_ville: false,
+    heurD: false,
+    heurF: false,
+    adresse: false,
+    addressValid: false
   })
 
   const [villeListe, setVilleListe] = useState<any[]>([])
@@ -135,12 +151,13 @@ export default function MedecinModal({
         image: '',
         email: '',
         tarif: '',
-        id_ville: '',
+        id_ville: 0,
         heurD: '',
         heurF: '',
         info: '',
         nom_ut: '',
-        id_spe: ''
+        id_spe: 0,
+        adresse: ''
       })
     }
   }, [medecinData])
@@ -151,17 +168,26 @@ export default function MedecinModal({
       image: '',
       email: '',
       tarif: '',
-      id_ville: '',
+      id_ville: 0,
       heurD: '',
       heurF: '',
       info: '',
       nom_ut: '',
-      id_spe: ''
+      id_spe: 0,
+      adresse: ''
     })
     setControls({
+      nom_ut: false,
       email: false,
       emailValid: false,
-      nom_ut: false
+      id_spe: false,
+      tarif: false,
+      tarifValid: false,
+      id_ville: false,
+      heurD: false,
+      heurF: false,
+      adresse: false,
+      addressValid: false
     })
   }
 
@@ -172,9 +198,17 @@ export default function MedecinModal({
       const url = `${window.location.origin}/api/medecin/${isAdd ? 'ajouter' : 'modifier'}`
 
       const newControls = {
+        nom_ut: data.nom_ut.trim() === '',
         email: data.email.trim() === '',
         emailValid: mailCheck(data.email.trim()),
-        nom_ut: data.nom_ut.trim() === ''
+        id_spe: data.id_spe === 0,
+        tarif: data.tarif.trim() === '',
+        tarifValid: tarifCheck(data.tarif.trim()),
+        id_ville: data.id_ville === 0,
+        heurD: data.heurD.trim() === '',
+        heurF: data.heurF.trim() === '',
+        adresse: data.adresse.trim() === '',
+        addressValid: addressCheck(data.adresse.trim())
       }
 
       setControls(newControls)
@@ -328,11 +362,14 @@ export default function MedecinModal({
               fullWidth
               label='Email'
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
+                sx: {
+                  fontSize: '1rem'
+                }
               }}
               InputProps={{
                 sx: {
                   height: 60,
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -343,20 +380,16 @@ export default function MedecinModal({
               value={data?.email ?? ''}
               className={`${controls?.email === true || controls.emailValid === true ? 'isReq' : ''}`}
               onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, email: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    email: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, email: false })
-                  setControls({ ...controls, emailValid: mailCheck(e.target.value.trim()) })
-                  setData((prev: any) => ({
-                    ...prev,
-                    email: e.target.value
-                  }))
-                }
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = mailCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, email: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  email: isEmpty,
+                  emailValid: !isEmpty && isInvalid
+                }))
               }}
             />
             {controls?.email === true ? (
@@ -367,28 +400,37 @@ export default function MedecinModal({
               </span>
             ) : null}
           </Grid>
-
           <Grid item xs={6} md={6}>
             <FormControl fullWidth>
               <InputLabel>Spéciallité</InputLabel>
               <Select
                 label='Spéciallité'
-                value={data?.id_spe ?? ''}
+                value={data?.id_spe || null}
+                className={`${controls?.id_spe === true ? 'isReq' : ''}`}
                 onChange={(e: any) => {
                   if (e === null) {
-                    setData({ ...data, id_spe: e.target.value })
+                    setControls({ ...controls, id_spe: true })
+                    setData((prev: any) => ({
+                      ...prev,
+                      id_spe: e.target.value
+                    }))
                   } else {
-                    setData({ ...data, id_spe: e.target.value })
+                    setControls({ ...controls, id_spe: false })
+                    setData((prev: any) => ({
+                      ...prev,
+                      id_spe: e.target.value
+                    }))
                   }
                 }}
               >
-                {speListe.map((item: any) => (
+                {speListe.map(item => (
                   <MenuItem value={item.id} key={item.id}>
                     {item.spe}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
+            {controls?.id_spe === true ? <span className='errmsg'>Veuillez sélectionner la spéciallité !</span> : null}
           </Grid>
 
           <Grid item xs={6} md={6}>
@@ -396,19 +438,28 @@ export default function MedecinModal({
               fullWidth
               label='Tarif'
               value={data?.tarif ?? ''}
+              className={`${controls?.tarif === true || controls.tarifValid === true ? 'isReq' : ''}`}
               onChange={(e: any) => {
-                setData((prev: any) => ({
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = tarifCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, tarif: value }))
+                setControls((prev: any) => ({
                   ...prev,
-                  tarif: e.target.value
+                  tarif: isEmpty,
+                  tarifValid: isInvalid
                 }))
               }}
-              autoFocus
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
+                sx: {
+                  fontSize: '1rem'
+                }
               }}
               InputProps={{
                 sx: {
                   height: 60,
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -417,47 +468,74 @@ export default function MedecinModal({
                 }
               }}
             />
+            {controls?.tarif === true ? (
+              <span className='errmsg'>Veuillez saisir le tarif !</span>
+            ) : controls.tarifValid === true ? (
+              <span className='errmsg'>Le tarif est invalide : il doit être un nombre.</span>
+            ) : null}
           </Grid>
           <Grid item xs={6} md={6}>
             <FormControl fullWidth>
               <InputLabel>Ville</InputLabel>
               <Select
                 label='Ville'
-                value={data?.id_ville ?? ''}
+                className={`${controls?.id_ville === true ? 'isReq' : ''}`}
+                value={data?.id_ville || null}
                 onChange={(e: any) => {
                   if (e === null) {
-                    setData({ ...data, id_ville: e.target.value })
+                    setControls({ ...controls, id_ville: true })
+                    setData((prev: any) => ({
+                      ...prev,
+                      id_ville: e.target.value
+                    }))
                   } else {
-                    setData({ ...data, id_ville: e.target.value })
+                    setControls({ ...controls, id_ville: false })
+                    setData((prev: any) => ({
+                      ...prev,
+                      id_ville: e.target.value
+                    }))
                   }
                 }}
               >
-                {villeListe.map(item => (
+                {villeListe.map((item: any) => (
                   <MenuItem value={item.id} key={item.id}>
                     {item.ville}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
+            {controls?.id_ville === true ? <span className='errmsg'>Veuillez sélectionner la ville!</span> : null}
           </Grid>
           <Grid item xs={6} md={6}>
             <TextField
               fullWidth
               type='time'
+              className={`${controls?.heurD === true ? 'isReq' : ''}`}
               value={data?.heurD ?? ''}
               onChange={(e: any) => {
-                setData((prev: any) => ({
-                  ...prev,
-                  heurD: e.target.value
-                }))
+                if (e.target?.value.trim() === '') {
+                  setControls({ ...controls, heurD: true })
+                  setData((prev: any) => ({
+                    ...prev,
+                    heurD: e.target.value
+                  }))
+                } else {
+                  setControls({ ...controls, heurD: false })
+                  setData((prev: any) => ({
+                    ...prev,
+                    heurD: e.target.value
+                  }))
+                }
               }}
-              autoFocus
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
+                sx: {
+                  fontSize: '1rem'
+                }
               }}
               InputProps={{
                 sx: {
                   height: 60,
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -466,25 +544,40 @@ export default function MedecinModal({
                 }
               }}
             />
+            {controls?.heurD === true ? (
+              <span className='errmsg'>Veuillez sélectionner l’heure de début de travail !</span>
+            ) : null}
           </Grid>
           <Grid item xs={6} md={6}>
             <TextField
               fullWidth
               type='time'
+              className={`${controls?.heurF === true ? 'isReq' : ''}`}
               value={data?.heurF ?? ''}
               onChange={(e: any) => {
-                setData((prev: any) => ({
-                  ...prev,
-                  heurF: e.target.value
-                }))
+                if (e.target?.value.trim() === '') {
+                  setControls({ ...controls, heurF: true })
+                  setData((prev: any) => ({
+                    ...prev,
+                    heurF: e.target.value
+                  }))
+                } else {
+                  setControls({ ...controls, heurF: false })
+                  setData((prev: any) => ({
+                    ...prev,
+                    heurF: e.target.value
+                  }))
+                }
               }}
-              autoFocus
               InputLabelProps={{
-                sx: { fontSize: '1rem' }
+                sx: {
+                  fontSize: '1rem'
+                }
               }}
               InputProps={{
                 sx: {
                   height: 60,
+                  fontSize: '1rem',
                   '&.Mui-focused': {
                     '& + .MuiInputLabel-root': {
                       fontSize: '1rem'
@@ -493,6 +586,56 @@ export default function MedecinModal({
                 }
               }}
             />
+            {controls?.heurF === true ? (
+              <span className='errmsg'>Veuillez sélectionner l’heure de fin de travail !</span>
+            ) : null}
+          </Grid>
+
+          <Grid item xs={12} md={12}>
+            <TextField
+              fullWidth
+              label='Adresse'
+              InputLabelProps={{
+                sx: {
+                  fontSize: '1rem'
+                }
+              }}
+              InputProps={{
+                sx: {
+                  height: 60,
+                  fontSize: '1rem',
+                  '&.Mui-focused': {
+                    '& + .MuiInputLabel-root': {
+                      fontSize: '1rem'
+                    }
+                  }
+                }
+              }}
+              value={data?.adresse ?? ''}
+              className={`${controls?.adresse === true || controls.addressValid === true ? 'isReq' : ''}`}
+              onChange={(e: any) => {
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = addressCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, adresse: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  adresse: isEmpty,
+                  addressValid: !isEmpty && isInvalid
+                }))
+              }}
+            />
+            {controls?.adresse === true ? (
+              <span className='errmsg'>Veuillez saisir l’adresse !</span>
+            ) : controls.addressValid === true ? (
+              <span className='errmsg'>
+                <span className='errmsg'>
+                  Adresse invalide : elle doit contenir au moins 5 caractères et ne pas inclure de symboles spéciaux non
+                  autorisés.
+                </span>
+              </span>
+            ) : null}
           </Grid>
 
           <Grid item xs={12} md={12}>

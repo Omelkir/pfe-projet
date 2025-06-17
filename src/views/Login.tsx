@@ -82,6 +82,8 @@ const Login = () => {
     }
   }
 
+  console.log('loginError', loginError)
+
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
