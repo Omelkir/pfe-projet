@@ -7,7 +7,6 @@ pipeline {
             description: 'Exécuter l’analyse SonarQube ?'
         )
     }
-    
     environment {
         SONAR_SCANNER_HOME = tool 'SonarQubeScanner' // Outil défini dans Jenkins
         SONAR_HOST_URL = 'http://jenkins.frequencem.com:9000/' // URL du serveur SonarQube
