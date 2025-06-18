@@ -33,27 +33,27 @@ const NavbarMenu = [
   {
     id: 1,
     title: 'Acceuil',
-    path: '/front_page'
+    path: '/'
   },
   {
     id: 2,
     title: 'À propos de nous',
-    path: '/front_page/a-propos-de-nous'
+    path: '/a-propos-de-nous'
   },
   {
     id: 3,
     title: 'Médecin',
-    path: '/front_page/med'
+    path: '/med'
   },
   {
     id: 4,
     title: 'Laboratoire',
-    path: '/front_page/labo'
+    path: '/labo'
   },
   {
     id: 5,
     title: 'Contactez-nous',
-    path: '/front_page/contactez-nous'
+    path: '/contactez-nous'
   }
 ]
 

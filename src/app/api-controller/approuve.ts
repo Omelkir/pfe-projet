@@ -52,7 +52,15 @@ export const updateApprovalLaboratoire = async (body: any) => {
 
 export const updateApprovalPatient = async (body: any) => {
   try {
-    const { id } = body
+    const { id, email, nom, prenom } = body
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'mediconnect048@gmail.com',
+        pass: 'gkka ctir ardv fyea'
+      }
+    })
 
     if (!id) {
       return { erreur: true, message: 'Paramètres invalides' }
@@ -65,6 +73,26 @@ export const updateApprovalPatient = async (body: any) => {
     `
 
     await pool.query(sql, [id])
+
+    const mailOptions = {
+      from: '"MediConnect" <mediconnect048@gmail.com>',
+      to: email,
+      subject: 'Confirmation de votre compte',
+      html: `
+    <p>Bonjour <strong>${nom} ${prenom}</strong>,</p>
+
+    <p>Nous avons le plaisir de vous informer que votre compte a été <strong>accepté</strong>.</p>
+
+    <p>Merci d’avoir choisi <strong>MediConnect</strong> pour la gestion de vos soins de santé.</p>
+
+    <p>Nous restons à votre disposition pour toute information complémentaire.</p>
+
+    <p>Cordialement,<br>
+    L'équipe <strong>MediConnect</strong></p>
+  `
+    }
+
+    await transporter.sendMail(mailOptions)
 
     return { erreur: false, data: true }
   } catch (error) {

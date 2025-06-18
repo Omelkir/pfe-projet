@@ -14,9 +14,9 @@ export const liste = async (req: any) => {
       if (paramsObj[key] && ['getall', 'page', 'limit'].indexOf(key) === -1) {
         // Ajoute la condition WHERE
         if (index === 0) {
-          whereClause += ` WHERE ${key} = ${paramsObj[key]}`
+          whereClause += ` WHERE p.${key} = ${paramsObj[key]}`
         } else {
-          whereClause += ` AND ${key} = ${paramsObj[key]}`
+          whereClause += ` AND p.${key} = ${paramsObj[key]}`
         }
       }
 
@@ -28,7 +28,7 @@ export const liste = async (req: any) => {
         itemsPerPage = parseInt(paramsObj[key] as string)
       }
     })
-    const totalCountQuery = `SELECT COUNT(*) as count FROM medi_connect.patient ${whereClause}`
+    const totalCountQuery = `SELECT COUNT(*) as count FROM medi_connect.patient p ${whereClause}`
 
     const totalCountResult: any = await pool.query(totalCountQuery)
     const totalCount = totalCountResult[0][0].count
@@ -39,7 +39,7 @@ export const liste = async (req: any) => {
 
     const offset = (currentPage - 1) * itemsPerPage
 
-    const sql = `SELECT * FROM patient ${whereClause} LIMIT
+    const sql = `SELECT p.*, v.ville AS ville FROM patient p LEFT JOIN ville v ON p.id_ville = v.id ${whereClause} LIMIT
     ${itemsPerPage}
 OFFSET
     ${offset}`

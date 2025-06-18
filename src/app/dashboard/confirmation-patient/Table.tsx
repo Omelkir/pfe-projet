@@ -29,7 +29,7 @@ const Table = ({
 
   async function getPatientsList(page = 1) {
     try {
-      const url = `${window.location.origin}/api/patient/compte-patient?approuve=0&page=${page}`
+      const url = `${window.location.origin}/api/patient/compte-patient?approuve=0&archive=0&page=${page}`
 
       const requestOptions = {
         method: 'GET',
@@ -54,13 +54,16 @@ const Table = ({
     }
   }
 
-  const handleChange = async (id: number) => {
+  const handleChange = async (row: any) => {
     try {
       const response = await fetch(`${window.location.origin}/api/approve-patient/modifier`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: id
+          id: row.id,
+          email: row.email,
+          nom: row.nom,
+          prenom: row.prenom
         })
       })
 
@@ -88,11 +91,12 @@ const Table = ({
           <table className={tableStyles.table}>
             <thead>
               <tr>
-                <th>Nom Utilisateur</th>
+                <th>Nom</th>
+                <th>Prénom</th>
                 <th>Email</th>
                 <th>Ville</th>
-                <th>Spéciallité</th>
-                <th className='text-center'>Approuvé</th>
+                <th>Téléphone</th>
+                <th className='text-center'>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -103,10 +107,13 @@ const Table = ({
                       <CustomAvatar src={row.image} size={34} />
                       <div className='flex flex-col'>
                         <Typography color='text.primary' className='font-medium'>
-                          {row.nom_ut}
+                          {row.nom}
                         </Typography>
                       </div>
                     </div>
+                  </td>
+                  <td className='!plb-1'>
+                    <Typography>{row.prenom}</Typography>
                   </td>
                   <td className='!plb-1'>
                     <Typography>{row.email}</Typography>
@@ -115,14 +122,14 @@ const Table = ({
                     <Typography>{row.ville}</Typography>
                   </td>
                   <td className='!plb-1'>
-                    <Typography>{row.spe}</Typography>
+                    <Typography>{row.tel}</Typography>
                   </td>
                   <td className='flex justify-center gap-2'>
                     <Check
                       className='text-green-600 text-xl font-bold cursor-pointer hover:text-2xl'
                       strokeWidth={3}
                       onClick={async () => {
-                        await handleChange(row.id)
+                        await handleChange(row)
                       }}
                     />
 

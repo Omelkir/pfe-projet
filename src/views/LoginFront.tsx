@@ -35,7 +35,7 @@ const LoginFront = () => {
     getStorageData('typeOfLogger') !== undefined
 
   if (isLogged) {
-    router.push('/front_page')
+    router.push('/')
   }
 
   const [isPasswordShown, setIsPasswordShown] = useState(false)
@@ -99,7 +99,7 @@ const LoginFront = () => {
 
         setStorageData('typeOfLogger', result.role)
         setStorageData('user', result.user)
-        router.push('/front_page')
+        router.push('/')
         clearForm()
       } else {
         setTypeOfLogger(0)

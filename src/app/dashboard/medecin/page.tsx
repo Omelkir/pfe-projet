@@ -8,7 +8,7 @@ import { Button, Card, CardContent, Grid, Link } from '@mui/material'
 
 import { Stethoscope } from 'lucide-react'
 
-import Table from '@/app/(dashboard)/medecin/Table'
+import Table from '@/app/dashboard/medecin/Table'
 
 import Arrow from '@/views/dashboard/Arrow'
 import MedecinModal from '@/components/modals/medecin'
@@ -43,7 +43,7 @@ const Medecin = () => {
             <Link
               className='underline cursor-pointer'
               onClick={() => {
-                router.push('/archive-medecin')
+                router.push('/dashboard/archive-medecin')
               }}
             >
               Liste des médecins archivés

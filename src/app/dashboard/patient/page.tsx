@@ -41,7 +41,7 @@ const Patient = ({}: any) => {
             <Link
               className='underline cursor-pointer'
               onClick={() => {
-                router.push('/archive-patient')
+                router.push('/dashboard/archive-patient')
               }}
             >
               Liste des patients archivés

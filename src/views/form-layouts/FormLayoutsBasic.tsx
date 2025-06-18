@@ -5,7 +5,6 @@ import { useState } from 'react'
 
 // Next Imports
 
-
 // MUI Imports
 import Link from 'next/link'
 
@@ -103,7 +102,7 @@ const FormLayoutsBasic = () => {
                 </Button>
                 <div className='flex items-center justify-center gap-2'>
                   <Typography color='text.primary'>Already have an account?</Typography>
-                  <Link href='/' onClick={e => e.preventDefault()} className='text-primary'>
+                  <Link href='/dashboard' onClick={e => e.preventDefault()} className='text-primary'>
                     Log In
                   </Link>
                 </div>

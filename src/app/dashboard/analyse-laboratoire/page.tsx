@@ -154,8 +154,8 @@ const AnalyseLaboratoire = () => {
           <AnalyseModal
             isOpen={isModalOpen}
             analyseData={selected}
-            patient={selectedPatient}
-            id_el={userData.id}
+            patient={selectedPatient?.id}
+            id_el={userData?.id}
             onClose={() => setIsModalOpen(false)}
             setUpdate={setUpdate}
           />

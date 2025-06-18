@@ -8,7 +8,7 @@ import { FlaskConical } from 'lucide-react'
 
 import { toast } from 'react-toastify'
 
-import Table from '@/app/(dashboard)/laboratoire/Table'
+import Table from '@/app/dashboard/laboratoire/Table'
 import Arrow from '@/views/dashboard/Arrow'
 import LaboratoireModal from '@/components/modals/laboratoire'
 import DeleteModal from '@/components/modals/deleteModal/deleteModal'

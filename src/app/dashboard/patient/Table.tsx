@@ -120,7 +120,8 @@ const Table = ({
                 <th>Prenom</th>
                 <th>Email</th>
                 <th>Téléphone</th>
-                <th>Fiche</th>
+                <th>Ville</th>
+                {userData.role === 2 ? <th>Fiche</th> : null}
                 <th className='text-center'>Action</th>
               </tr>
             </thead>
@@ -154,13 +155,18 @@ const Table = ({
                       <Typography>{row.tel}</Typography>
                     </td>
                     <td className='!plb-1'>
-                      {userData.role === 2 ? (
+                      <Typography>{row.ville}</Typography>
+                    </td>
+                    {userData.role === 2 ? (
+                      <td className='!plb-1'>
                         <button
                           className='ri-folder-line text-blue-500 text-xl hover:text-2xl'
-                          onClick={() => window.open('/fiche-patient?id=' + row.id, '_blank', 'noopener,noreferrer')}
+                          onClick={() =>
+                            window.open('/dashboard/fiche-patient?id=' + row.id, '_blank', 'noopener,noreferrer')
+                          }
                         ></button>
-                      ) : null}
-                    </td>
+                      </td>
+                    ) : null}
                     <td className='flex justify-center gap-2'>
                       <button
                         className='ri-edit-box-line text-yellow-500 text-xl hover:text-2xl'

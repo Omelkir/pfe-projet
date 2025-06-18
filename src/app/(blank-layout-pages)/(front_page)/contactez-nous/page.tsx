@@ -12,8 +12,15 @@ import {
   Select,
   FormControl,
   InputLabel,
-  MenuItem
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  Box,
+  DialogContent,
+  DialogActions
 } from '@mui/material'
+
+import { FaCheckCircle, FaEnvelope } from 'react-icons/fa'
 
 import { getStorageData } from '@/utils/helpersFront'
 import ConnModal from '@/components/modals/conOblig'
@@ -23,6 +30,7 @@ const ConnectezNous = () => {
 
   const userDataFront = getStorageData('user')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const handleOpenModal = () => {
     setIsModalOpen(true)
@@ -95,6 +103,7 @@ const ConnectezNous = () => {
       } else {
         setData(responseData)
         clearForm()
+        setOpen(true)
       }
     } catch (error) {
       console.log('Erreur:', error)
@@ -204,16 +213,43 @@ const ConnectezNous = () => {
               >
                 Envoyer
               </Button>
-              {authError && (
-                <Typography color='error' className='text-center mt-2'>
-                  Vous devez être connecté pour envoyer une réclamation.
-                </Typography>
-              )}
             </form>
           </div>
         </CardContent>
       </Card>
       <ConnModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth='xs' fullWidth>
+        <DialogTitle>
+          <Box display='flex' alignItems='center' gap={1}>
+           
+            <h1 className='block w-full text-center'>
+             <FaCheckCircle className='text-green-500 text-6xl' />
+            </h1>
+          </Box>
+        </DialogTitle>
+       
+
+        <DialogContent dividers className='mb-3 text-center'>
+          <div className='text-center px-4 space-y-2'>
+            <h3 className='text-lg font-semibold text-green-700'>
+              Votre réclamation a été <strong>envoyée avec succès</strong>
+            </h3>
+            <p className='text-sm text-gray-700 leading-6'>
+              Veuillez attendre sa <strong>réponse par un administrateur</strong>.
+            </p>
+            <div className='flex items-center justify-center gap-2 text-sm text-gray-700'>
+              <FaEnvelope className='text-lg text-green-600' />
+              <span>Un e-mail de réponse vous sera envoyé.</span>
+            </div>
+          </div>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: 'flex-end', p: 2 }}>
+          <Button style={{ backgroundColor: 'white', color: 'black' }} size='small' onClick={() => setOpen(false)}>
+            Fermer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </motion.div>
   )
 }

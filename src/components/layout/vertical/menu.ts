@@ -3,66 +3,66 @@ import { SubMenu } from '@/@menu/vertical-menu'
 export const menuMed = [
   {
     label: 'Dashboard',
-    path: '/',
+    path: '/dashboard',
     icon: 'ri-dashboard-fill'
   },
   {
     label: 'Patient',
-    path: '/patient',
+    path: '/dashboard/patient',
     icon: 'ri-user-fill'
   },
-  { label: 'Fiche Patient', path: '/fiche-patient ', icon: 'ri-dossier-line' },
+  { label: 'Fiche Patient', path: '/dashboard/fiche-patient ', icon: 'ri-dossier-line' },
 
-  { label: 'Rendez-vous', path: '/rendez-vous', icon: 'ri-calendar-fill' },
+  { label: 'Rendez-vous', path: '/dashboard/rendez-vous', icon: 'ri-calendar-fill' },
   {
     label: 'Demandes de rendez-vous',
-    path: '/demande-rendezVous',
+    path: '/dashboard/demande-rendezVous',
     icon: 'ri-file-list-fill'
   }
 ]
 export const menulabo = [
   {
     label: 'Dashboard',
-    path: '/',
+    path: '/dashboard',
     icon: 'ri-dashboard-fill'
   },
   {
     label: 'Patient',
-    path: '/patient',
+    path: '/dashboard/patient',
     icon: 'ri-user-fill'
   },
   {
     label: 'Analyse',
-    path: '/analyse-laboratoire',
+    path: '/dashboard/analyse-laboratoire',
     icon: 'ri-file-fill'
   },
-  { label: 'Rendez-vous', path: '/rendez-vous', icon: 'ri-calendar-fill' },
+  { label: 'Rendez-vous', path: '/dashboard/rendez-vous', icon: 'ri-calendar-fill' },
   {
     label: 'Demandes de rendez-vous',
-    path: '/demande-rendezVous',
+    path: '/dashboard/demande-rendezVous',
     icon: 'ri-file-list-fill'
   }
 ]
 export const menuAdmin = [
   {
     label: 'Dashboard',
-    path: '/',
+    path: '/dashboard',
     icon: 'ri-dashboard-fill'
   },
   {
     label: 'Médecin',
-    path: '/medecin',
+    path: '/dashboard/medecin',
     icon: 'ri-nurse-fill'
   },
   {
     label: 'Laboratoire',
-    path: '/laboratoire',
+    path: '/dashboard/laboratoire',
     icon: 'ri-microscope-fill'
   },
 
   {
     label: 'Patient',
-    path: '/patient',
+    path: '/dashboard/patient',
     icon: 'ri-user-fill'
   },
   {
@@ -71,12 +71,12 @@ export const menuAdmin = [
     subMenu: [
       {
         label: 'Spécialité',
-        path: '/specialite',
+        path: '/dashboard/specialite',
         icon: 'ri-star-fill'
       },
       {
         label: 'Ville',
-        path: '/ville',
+        path: '/dashboard/ville',
         icon: 'ri-building-2-fill'
       }
     ]
@@ -84,7 +84,7 @@ export const menuAdmin = [
 
   {
     label: 'Réclamation',
-    path: '/reclamation',
+    path: '/dashboard/reclamation',
     icon: 'ri-mail-unread-line'
   },
   {
@@ -94,17 +94,17 @@ export const menuAdmin = [
     subMenu: [
       {
         label: 'Médecin',
-        path: '/confirmation-medecin',
+        path: '/dashboard/confirmation-medecin',
         icon: 'ri-nurse-fill'
       },
       {
         label: 'Laboratoire',
-        path: '/confirmation-laboratoire',
+        path: '/dashboard/confirmation-laboratoire',
         icon: 'ri-microscope-fill'
       },
       {
         label: 'Patient',
-        path: '/confirmation-patient',
+        path: '/dashboard/confirmation-patient',
         icon: 'ri-user-fill'
       }
     ]

@@ -33,7 +33,7 @@ const Login = () => {
     getStorageData('typeOfLogger') !== undefined
 
   if (isLogged) {
-    router.push('/')
+    router.push('/dashboard')
   }
 
   // States
@@ -73,7 +73,7 @@ const Login = () => {
 
         setStorageData('typeOfLogger', result.role)
         setStorageData('user', result.user)
-        router.push('/')
+        router.push('/dashboard')
       } else {
         setTypeOfLogger(0)
       }
@@ -88,7 +88,7 @@ const Login = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    router.push('/')
+    router.push('/dashboard')
   }
 
   return (

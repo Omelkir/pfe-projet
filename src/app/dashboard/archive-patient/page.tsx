@@ -10,7 +10,7 @@ import Arrow from '@/views/dashboard/Arrow'
 
 import TableArchive from './TableArchive'
 
-const ArchiveMedecin = ({}: any) => {
+const ArchivePatient = ({}: any) => {
   const [update, setUpdate] = useState<string>('')
   const router = useRouter()
 
@@ -18,15 +18,15 @@ const ArchiveMedecin = ({}: any) => {
     <div>
       <Card className='min-h-screen'>
         <CardContent>
-          <Arrow title='Dashboard' subTitle='Liste des médecins archivés' />
+          <Arrow title='Dashboard' subTitle='Liste des patients archivés' />
           <div className='flex justify-end mb-3'>
             <Link
               className='underline cursor-pointer'
               onClick={() => {
-                router.push('/medecin')
+                router.push('/dashboard/patient')
               }}
             >
-              Liste des médecins
+              Liste des patients
             </Link>
           </div>
           <Grid item xs={12}>
@@ -38,4 +38,4 @@ const ArchiveMedecin = ({}: any) => {
   )
 }
 
-export default ArchiveMedecin
+export default ArchivePatient
