@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState, type FormEvent } from 'react'
 
 import { Paperclip } from 'lucide-react'
 
+import { toast } from 'react-toastify'
+
 import ChatbotIcon from './ChatbotIcon'
 import { getStorageData } from '@/utils/helpersFront'
 import ConnModal from '@/components/modals/conOblig'
@@ -88,12 +90,53 @@ const Chatbot: React.FC = () => {
   const userData = getStorageData('user')
   const [showChatbot, setShowChatbot] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [annuaireDocteur, setAnnuaireDocteur] = useState<string>('')
 
   const [chatHistory, setChatHistory] = useState<ChatMessageType[]>([
     { role: 'model', text: 'Bonjour Comment puis-je vous aider aujourd’hui ?' }
   ])
 
   const [isLoadingBotResponse, setIsLoadingBotResponse] = useState(false)
+
+  async function getMedecinsList() {
+    try {
+      const url = `${window.location.origin}/api/medecin/liste`
+
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      }
+
+      const response = await fetch(url, requestOptions)
+
+      if (!response.ok) throw new Error('Erreur lors de la requête')
+
+      const responseData = await response.json()
+
+      console.log('API Response:', responseData)
+
+      if (responseData.erreur) {
+        toast.error(responseData.message)
+      } else {
+        const res: string = (responseData?.data ?? [])
+          ?.map((x: any) => {
+            return `Docteur ${x.nom_ut} ( spécialité :${x.spe} , Adresse: ${x.adresse} , ville: ${x.ville} , Email:  ${x.email} , Horaire: ${x.heurD} - ${x.heurF})`
+          })
+          ?.join(',')
+
+        console.log(res)
+
+        setAnnuaireDocteur(res)
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Une erreur est survenue lors de la récupération des données.')
+    }
+  }
+
+  useEffect(() => {
+    getMedecinsList()
+  }, [])
 
   const scrollToBottom = () => {
     if (chatBodyRef.current) {
@@ -308,6 +351,7 @@ Utilise :
 - <ul><li></li></ul> pour les maladies ou hypothèses possibles
 
 ❌ Ne commence pas par "Analysons les résultats de...", va directement au contenu. Ne dis pas "voici ce que cela signifie", mais donne la signification médicale directement.
+et aprés conseille moi le  quelle parmis l'annuaire  des docteur je peut contacté et dans moi ces info comme une carte visite ${annuaireDocteur}
 `
 
       console.log(fullQuestionForAPI)

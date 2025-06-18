@@ -211,8 +211,8 @@ export const modifier = async (req: any) => {
     })
 
     const id = json.id
-
-    const sql = `UPDATE medi_connect.admin SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',mdp='${json.mdp}' where id='${id}'`
+    const strmdp: string = json.mdp?.trim() !== '' ? ` , mdp='${json.mdp}' ` : ''
+    const sql = `UPDATE medi_connect.admin SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}' ${strmdp} where id='${id}'`
 
     await pool.query(sql)
 

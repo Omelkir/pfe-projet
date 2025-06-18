@@ -117,6 +117,15 @@ const NavbarContent = () => {
   }
 
   useEffect(() => {
+    const fetchNotifications = async () => {
+      if (userData?.id) {
+        await getNotification(userData.id)
+      }
+    }
+
+    fetchNotifications()
+  }, [])
+  useEffect(() => {
     const interval = setInterval(async () => {
       await getNotification(userData?.id)
     }, 10000)

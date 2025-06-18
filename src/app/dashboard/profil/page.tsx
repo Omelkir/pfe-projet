@@ -137,8 +137,8 @@ const AccountDetails = () => {
         heurF: c.heurF,
         info: c.info,
         id_spe: c.id_spe,
-        mdp: c.mdp,
-        conMdp: c.mdp,
+        mdp: '', //c.mdp,
+        conMdp: '', //: c.mdp,
         imageSrc: c.image ? `${window.location.origin}/${c.image}` : '/img/placeholder-image.jpg'
       }))
     }
@@ -242,10 +242,18 @@ const AccountDetails = () => {
       const newControls = {
         email: data.email.trim() === '',
         emailValid: mailCheck(data.email.trim()),
-        mdpValid: passwordCheck(data.mdp.trim()),
-        conMdpValid: passwordCheck(data.conMdp.trim()),
-        mdp: data.mdp.trim() === '',
-        conMdp: data.conMdp.trim() === '',
+
+        mdpValid:
+          compte[0]?.id !== 0
+            ? data.mdp.trim()?.length > 1 && passwordCheck(data.mdp.trim())
+            : passwordCheck(data.mdp.trim()),
+        conMdpValid:
+          compte[0]?.id !== 0
+            ? data.conMdp.trim()?.length > 1 && passwordCheck(data.conMdp.trim())
+            : passwordCheck(data.conMdp.trim()),
+        mdp: compte[0]?.id !== 0 ? data.mdp.trim()?.length > 1 && data.mdp.trim() === '' : data.mdp.trim() === '',
+        conMdp:
+          compte[0]?.id !== 0 ? data.conMdp.trim()?.length > 1 && data.conMdp.trim() === '' : data.conMdp.trim() === '',
         mismatch: data.mdp.trim() !== data.conMdp.trim(),
         ...(userData?.role === 2 && {
           nom_ut: data.nom_ut.trim() === '',
@@ -736,14 +744,14 @@ const AccountDetails = () => {
                 }}
                 onChange={(e: any) => {
                   const value = e.target.value
-                  const isEmpty = value.trim() === ''
+                  const isEmpty = compte[0]?.id !== 0 ? false : value.trim() === ''
                   const isInvalid = passwordCheck(value.trim())
 
                   setData((prev: any) => ({ ...prev, mdp: value }))
                   setControls((prev: any) => ({
                     ...prev,
                     mdp: isEmpty,
-                    mdpValid: !isEmpty && isInvalid
+                    mdpValid: compte[0]?.id !== 0 ? isInvalid : !isEmpty && isInvalid
                   }))
                 }}
               />
