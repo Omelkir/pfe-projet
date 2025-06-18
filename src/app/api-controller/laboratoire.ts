@@ -123,9 +123,9 @@ export const liste = async (req: any) => {
     Object.keys(paramsObj).forEach((key, index) => {
       if (paramsObj[key] && ['page', 'limit'].indexOf(key) === -1) {
         if (index === 0) {
-          whereClause += ` WHERE ${key} = ${paramsObj[key]}`
+          whereClause += ` WHERE l.${key} = ${paramsObj[key]}`
         } else {
-          whereClause += ` AND ${key} = ${paramsObj[key]}`
+          whereClause += ` AND l.${key} = ${paramsObj[key]}`
         }
       }
 

@@ -32,7 +32,8 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (med: any) => void; setU
 
   async function getMedecinsList(page = 1) {
     try {
-      const url = `${window.location.origin}/api/medecin/liste?page=${page}`
+      setIsLoading(true)
+      const url = `${window.location.origin}/api/medecin/liste?approuve=1&archive=0&page=${page}`
 
       const requestOptions = {
         method: 'GET',
@@ -56,6 +57,8 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (med: any) => void; setU
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Une erreur est survenue lors de la récupération des données.')
+    } finally {
+      setIsLoading(false)
     }
   }
 

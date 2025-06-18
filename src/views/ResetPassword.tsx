@@ -13,39 +13,59 @@ import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 
 // Type Imports
-import { IconButton, InputAdornment } from '@mui/material'
+import { Grid, IconButton, InputAdornment } from '@mui/material'
 
 import DirectionalIcon from '@components/DirectionalIcon'
 
 import Logo from '@components/layout/shared/Logo'
 
 const ResetPassword = () => {
+  const passwordCheck = (password: any) =>
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
+
   const [data, setData] = useState<any>({
-    email: '',
-    mdp: ''
+    mdp: '',
+    conMdp: ''
   })
 
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
   const to = searchParams.get('to')
   const role = searchParams.get('role')
-
-  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
-
   const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [isPasswordShown2, setIsPasswordShown2] = useState(false)
+  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+  const handleClickShowPassword2 = () => setIsPasswordShown2(show => !show)
 
   const [controls, setControls] = useState<any>({
-    email: false
+    mdp: false,
+    conMdp: false,
+    mdpValid: false,
+    conMdpValid: false
   })
 
   const clearForm = () => {
-    setData({ email: '', mdp: '' })
-    setControls(false)
+    setData({ mdp: '', conMdp: '' })
+    setControls({ mdp: false, conMdp: false, mdpValid: false, conMdpValid: false })
   }
 
   async function handleSave() {
     try {
       const url = `${window.location.origin}/api/forgot-password/reset`
+
+      const newControls = {
+        mdpValid: passwordCheck(data.mdp.trim()),
+        conMdpValid: passwordCheck(data.conMdp.trim()),
+        mdp: data.mdp.trim() === '',
+        conMdp: data.conMdp.trim() === '',
+        mismatch: data.mdp.trim() !== data.conMdp.trim()
+      }
+
+      setControls(newControls)
+
+      if (Object.values(newControls).some(value => value)) {
+        return
+      }
 
       const requestBody = JSON.stringify({ to, token, mdp: data.mdp, role })
 
@@ -56,7 +76,10 @@ const ResetPassword = () => {
       }
 
       const response = await fetch(url, requestOptions)
-      const responseData = await response.json()
+
+      await response.json()
+
+      clearForm()
     } catch (error) {
       console.log('Erreur:', error)
     }
@@ -76,62 +99,133 @@ const ResetPassword = () => {
       {/* Formulaire */}
       <div className='flex flex-col justify-center items-center w-full max-w-xl p-12 min-h-screen space-y-6'>
         <div className='mb-5'>
-          <h3 className='text-3xl font-bold mb-3'>Reset Password 🔒</h3>
+          <h3 className='text-3xl font-bold mb-3'>Réinitialiser le mot de passe 🔒</h3>
           <Typography className='mbs-1 text-lg'>
-            Enter your email and we&#39;ll send you instructions to reset your password
+            Saisissez un nouveau mot de passe et confirmez-le pour réinitialiser votre mot de passe.
           </Typography>
         </div>
         <form noValidate autoComplete='off' className='w-full space-y-6 mt-8'>
           <div>
-            <TextField
-              fullWidth
-              value={data.mdp}
-              className={`${controls?.mdp === true ? 'isReq' : ''}`}
-              label='Password'
-              id='outlined-adornment-password'
-              type={isPasswordShown ? 'text' : 'password'}
-              InputLabelProps={{
-                sx: { fontSize: '1rem' }
-              }}
-              onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, mdp: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    mdp: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, mdp: false })
-                  setData((prev: any) => ({
-                    ...prev,
-                    mdp: e.target.value
-                  }))
-                }
-              }}
-              InputProps={{
-                sx: {
-                  height: 60,
-                  '&.Mui-focused': {
-                    '& + .MuiInputLabel-root': {
+            <Grid container spacing={6}>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  fullWidth
+                  value={data?.mdp ?? ''}
+                  label='Mot de passe'
+                  type={isPasswordShown ? 'text' : 'password'}
+                  InputLabelProps={{
+                    sx: {
                       fontSize: '1rem'
                     }
-                  },
-                  paddingRight: 5
-                },
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton
-                      size='large'
-                      edge='end'
-                      onClick={handleClickShowPassword}
-                      onMouseDown={e => e.preventDefault()}
-                    >
-                      <i className={isPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
+                  }}
+                  className={`${controls?.mdp === true || controls.mdpValid === true ? 'isReq' : ''}`}
+                  InputProps={{
+                    sx: {
+                      height: 60,
+                      fontSize: '1rem',
+                      '&.Mui-focused': {
+                        '& + .MuiInputLabel-root': {
+                          fontSize: '1rem'
+                        }
+                      },
+                      paddingRight: 5
+                    },
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton
+                          size='large'
+                          edge='end'
+                          onClick={handleClickShowPassword}
+                          onMouseDown={e => e.preventDefault()}
+                        >
+                          <i className={isPasswordShown ? 'ri-eye-off-line text-2xl' : 'ri-eye-line text-2xl'} />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                  onChange={(e: any) => {
+                    const value = e.target.value
+                    const isEmpty = value.trim() === ''
+                    const isInvalid = passwordCheck(value.trim())
+
+                    setData((prev: any) => ({ ...prev, mdp: value }))
+                    setControls((prev: any) => ({
+                      ...prev,
+                      mdp: isEmpty,
+                      mdpValid: !isEmpty && isInvalid
+                    }))
+                  }}
+                />
+                {controls?.mdp === true ? (
+                  <span className='errmsg'>Veuillez saisir le mot de passe !</span>
+                ) : controls.mdpValid === true ? (
+                  <span className='errmsg'>
+                    Mot de passe invalide : il doit contenir au moins 8 caractères, une majuscule, une minuscule, un
+                    chiffre et un caractère spécial (ex: @, $, !).
+                  </span>
+                ) : null}
+              </Grid>
+              <Grid item xs={12} md={12}>
+                <TextField
+                  fullWidth
+                  value={data?.conMdp ?? ''}
+                  label='Confirmation'
+                  type={isPasswordShown2 ? 'text' : 'password'}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '1rem'
+                    }
+                  }}
+                  className={`${controls?.conMdp === true || controls.conMdpValid === true ? 'isReq' : ''}`}
+                  InputProps={{
+                    sx: {
+                      height: 60,
+                      fontSize: '1rem',
+                      '&.Mui-focused': {
+                        '& + .MuiInputLabel-root': {
+                          fontSize: '1rem'
+                        }
+                      },
+                      paddingRight: 5
+                    },
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton
+                          size='large'
+                          edge='end'
+                          onClick={handleClickShowPassword2}
+                          onMouseDown={e => e.preventDefault()}
+                        >
+                          <i className={isPasswordShown2 ? 'ri-eye-off-line text-2xl' : 'ri-eye-line text-2xl'} />
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                  onChange={(e: any) => {
+                    const value = e.target.value
+                    const isEmpty = value.trim() === ''
+                    const isInvalid = passwordCheck(value.trim())
+
+                    setData((prev: any) => ({ ...prev, conMdp: value }))
+                    setControls((prev: any) => ({
+                      ...prev,
+                      conMdp: isEmpty,
+                      conMdpValid: !isEmpty && isInvalid
+                    }))
+                  }}
+                />
+                {controls?.conMdp === true ? (
+                  <span className='errmsg'>Confirmez le mot de passe !</span>
+                ) : controls.conMdpValid === true ? (
+                  <span className='errmsg'>
+                    Mot de passe invalide : il doit contenir au moins 8 caractères, une majuscule, une minuscule, un
+                    chiffre et un caractère spécial (ex: @, $, !).
+                  </span>
+                ) : data.mdp !== data.conMdp && data.conMdp !== '' ? (
+                  <span className='errmsg'>Les mots de passe ne correspondent pas.</span>
+                ) : null}
+              </Grid>
+            </Grid>
           </div>
           <Button
             fullWidth
@@ -145,15 +239,8 @@ const ResetPassword = () => {
               handleSave()
             }}
           >
-            Send reset link
+            Réinitialiser le mot de passe
           </Button>
-
-          <Typography className='flex justify-center items-center mt-4' color='primary'>
-            <Link href='/login' className='flex items-center'>
-              <DirectionalIcon ltrIconClass='ri-arrow-left-s-line' rtlIconClass='ri-arrow-right-s-line' />
-              <span>Back to Login</span>
-            </Link>
-          </Typography>
         </form>
       </div>
     </div>

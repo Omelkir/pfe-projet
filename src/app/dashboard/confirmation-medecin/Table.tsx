@@ -21,7 +21,7 @@ const Table = ({ update, onDelete, setUpdate }: { update: string; onDelete: (adm
 
   async function getMedecinsList(page = 1) {
     try {
-      const url = `${window.location.origin}/api/medecin/liste?approuve=0&page=${page}`
+      const url = `${window.location.origin}/api/medecin/liste?approuve=0&archive=0&page=${page}`
 
       const requestOptions = {
         method: 'GET',
@@ -46,13 +46,17 @@ const Table = ({ update, onDelete, setUpdate }: { update: string; onDelete: (adm
     }
   }
 
-  const handleChange = async (id: number) => {
+  const handleChange = async (row: any) => {
     try {
+      console.log('row', row)
+
       const response = await fetch(`${window.location.origin}/api/approve-medecin/modifier`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: id
+          id: row.id,
+          email: row.email,
+          nom_ut: row.nom_ut
         })
       })
 
@@ -114,7 +118,7 @@ const Table = ({ update, onDelete, setUpdate }: { update: string; onDelete: (adm
                       className='text-green-600 text-xl font-bold cursor-pointer hover:text-2xl'
                       strokeWidth={3}
                       onClick={async () => {
-                        await handleChange(row.id)
+                        await handleChange(row)
                       }}
                     />
 

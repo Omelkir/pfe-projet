@@ -34,7 +34,7 @@ const NotificationDropdown = ({ notifications = [] }: { notifications: any[] }) 
         <TableBody>
           {notifications.length > 0 ? (
             notifications.map(notification => (
-              <TableRow key={notification.id} hover>
+              <TableRow key={notification.id} className={notification.vu === 0 ? 'bg-blue-100' : ''} hover>
                 <TableCell>
                   <div className='flex gap-3 items-start'>
                     <CustomAvatar src={notification.image} size={34} />
@@ -75,7 +75,7 @@ const NavbarContent = () => {
 
   async function getNotification(id: any) {
     try {
-      const url = `${window.location.origin}/api/notification/get-notification?id_recepteur=${id}&el=${userData?.role}&vu=0`
+      const url = `${window.location.origin}/api/notification/get-notification?id_recepteur=${id}&el=${userData?.role}`
 
       const requestOptions = {
         method: 'GET',
@@ -119,7 +119,7 @@ const NavbarContent = () => {
   useEffect(() => {
     const interval = setInterval(async () => {
       await getNotification(userData?.id)
-    }, 30000)
+    }, 10000)
 
     return () => clearInterval(interval)
   }, [])
@@ -139,6 +139,7 @@ const NavbarContent = () => {
         <IconButton
           onClick={() => {
             toggleDropdown()
+
             notificationVu(userData?.id)
           }}
         >

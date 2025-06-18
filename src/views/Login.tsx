@@ -26,6 +26,10 @@ import { getStorageData, setStorageData } from '@/utils/helpers'
 
 const Login = () => {
   const router = useRouter()
+  const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
+
+  const passwordCheck = (password: any) =>
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
 
   const isLogged: any =
     getStorageData('typeOfLogger') !== -1 &&
@@ -44,14 +48,41 @@ const Login = () => {
 
   const [controls, setControls] = useState<any>({
     email: false,
-    mdp: false
+    emailValid: false,
+    mdp: false,
+    mdpValid: false
   })
+
+  const clearForm = () => {
+    setData({
+      email: '',
+      mdp: ''
+    })
+    setControls({
+      email: false,
+      emailValid: false,
+      mdp: false,
+      mdpValid: false
+    })
+  }
 
   async function handleSave() {
     try {
-      // setControls((prev: any) => ({ ...prev, email: data.email?.trim() === '' }));
-      // setControls((prev: any) => ({ ...prev, mdp: data.mdp?.trim() === '' }));
       const url = `${window.location.origin}/api/login/auth`
+
+      const newControls = {
+        email: data.email.trim() === '',
+        mdp: data.mdp.trim() === '',
+        emailValid: mailCheck(data.email.trim()),
+        mdpValid: passwordCheck(data.mdp.trim())
+      }
+
+      setControls(newControls)
+
+      if (Object.values(newControls).some(value => value)) {
+        return
+      }
+
       const requestBody = JSON.stringify({ email: data.email, mdp: data.mdp })
 
       const requestOptions = {
@@ -143,22 +174,25 @@ const Login = () => {
                 }
               }}
               onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, email: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    email: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, email: false })
-                  setData((prev: any) => ({
-                    ...prev,
-                    email: e.target.value
-                  }))
-                }
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = mailCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, email: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  email: isEmpty,
+                  emailValid: !isEmpty && isInvalid
+                }))
               }}
             />
-            {controls.email === true ? <span className='errmsg'>Please enter the email !</span> : null}
+            {controls?.email === true ? (
+              <span className='errmsg'>Veuillez saisir l’email !</span>
+            ) : controls.emailValid === true ? (
+              <span className='errmsg'>
+                Email invalide : il doit contenir @ et se terminer par un domaine valide (ex: .com, .net)
+              </span>
+            ) : null}
           </div>
           <div>
             <TextField
@@ -172,19 +206,16 @@ const Login = () => {
                 sx: { fontSize: '1rem' }
               }}
               onChange={(e: any) => {
-                if (e.target?.value.trim() === '') {
-                  setControls({ ...controls, mdp: true })
-                  setData((prev: any) => ({
-                    ...prev,
-                    mdp: e.target.value
-                  }))
-                } else {
-                  setControls({ ...controls, mdp: false })
-                  setData((prev: any) => ({
-                    ...prev,
-                    mdp: e.target.value
-                  }))
-                }
+                const value = e.target.value
+                const isEmpty = value.trim() === ''
+                const isInvalid = passwordCheck(value.trim())
+
+                setData((prev: any) => ({ ...prev, mdp: value }))
+                setControls((prev: any) => ({
+                  ...prev,
+                  mdp: isEmpty,
+                  mdpValid: !isEmpty && isInvalid
+                }))
               }}
               InputProps={{
                 sx: {
@@ -210,7 +241,14 @@ const Login = () => {
                 )
               }}
             />
-            {controls?.mdp === true ? <span className='errmsg'>Please enter the password !</span> : null}
+            {controls?.mdp === true ? (
+              <span className='errmsg'>Veuillez saisir le mot de passe !</span>
+            ) : controls.mdpValid === true ? (
+              <span className='errmsg'>
+                Mot de passe invalide : il doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre
+                et un caractère spécial (ex: @, $, !).
+              </span>
+            ) : null}
           </div>
 
           <Button

@@ -55,7 +55,7 @@ const Confirmation = () => {
 
   return (
     <div>
-      <Card>
+      <Card className='min-h-screen'>
         <CardContent>
           <Arrow title='Dashboard' subTitle='Confirmation' />
 

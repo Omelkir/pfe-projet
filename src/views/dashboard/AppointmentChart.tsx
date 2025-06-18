@@ -1,7 +1,11 @@
 'use client'
 
 // Next Imports
+import { useEffect, useState } from 'react'
+
 import dynamic from 'next/dynamic'
+
+// React & Hooks
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -16,17 +20,36 @@ import type { ApexOptions } from 'apexcharts'
 
 // Components Imports
 import OptionsMenu from '@core/components/option-menu'
+import { getStorageData } from '@/utils/helpers'
 
-// Styled Component Imports
-const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
+const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'), { ssr: false })
 
 const AppointmentChart = () => {
-  // Hooks
   const theme = useTheme()
+  const userData = getStorageData('user')
+  const [series, setSeries] = useState([{ name: 'Appointments', data: Array(12).fill(0) }])
 
-  // Vars
-  const divider = 'var(--mui-palette-divider)'
+  useEffect(() => {
+    const fetchRendezVous = async () => {
+      try {
+        const url = `${window.location.origin}/api/statistique-medecin/statistique?id_el=${userData?.id}&el=${userData?.role}`
+
+        const response = await fetch(url)
+        const res = await response.json()
+
+        if (!res.erreur && res.statistiquesRendezvous?.rendezvousParMois) {
+          setSeries([{ name: 'Appointments', data: res.statistiquesRendezvous.rendezvousParMois }])
+        }
+      } catch (error) {
+        console.error('Erreur chargement rendez-vous:', error)
+      }
+    }
+
+    fetchRendezVous()
+  }, [userData?.role])
+
   const disabled = 'var(--mui-palette-text-disabled)'
+  const divider = 'var(--mui-palette-divider)'
 
   const options: ApexOptions = {
     chart: {
@@ -75,7 +98,7 @@ const AppointmentChart = () => {
         offsetY: 2,
         offsetX: -17,
         style: { colors: disabled, fontSize: theme.typography.body2.fontSize as string },
-        formatter: value => `${value > 999 ? `${(value / 1000).toFixed(0)}` : value}k`
+        formatter: value => Math.round(value).toString()
       }
     }
   }
@@ -88,17 +111,11 @@ const AppointmentChart = () => {
       />
 
       <CardContent sx={{ '& .apexcharts-xcrosshairs.apexcharts-active': { opacity: 0 } }} style={{ paddingTop: 20 }}>
-        <AppReactApexCharts
-          type='bar'
-          height={300}
-          width='100%'
-          series={[{ name: 'Appointments', data: [30, 40, 35, 50, 49, 60, 70, 80, 75, 90, 85, 95] }]}
-          options={options}
-        />
-        <div className='flex items-center mbe-4 gap-4'>
-          <Typography variant='h4'>33%</Typography>
-          <Typography>Your appointments are 33% higher than last year</Typography>
-        </div>
+        <AppReactApexCharts type='bar' height={357} width='100%' series={series} options={options} />
+        {/* <div className='flex items-center mbe-4 gap-4 mt-4'>
+          <Typography variant='h4'>+33%</Typography>
+          <Typography>Vos rendez-vous sont 33% plus élevés que l’année dernière</Typography>
+        </div> */}
       </CardContent>
     </Card>
   )

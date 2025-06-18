@@ -17,6 +17,8 @@ import DirectionalIcon from '@components/DirectionalIcon'
 import Logo from '@components/layout/shared/Logo'
 
 const ForgotPassword = () => {
+  const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
+
   const [data, setData] = useState<any>({
     email: '',
     message: '',
@@ -25,12 +27,13 @@ const ForgotPassword = () => {
 
   const [controls, setControls] = useState<any>({
     email: false,
+    emailValid: false,
     role: false
   })
 
   const clearForm = () => {
     setData({ email: '', role: 0 })
-    setControls({ email: false, role: false })
+    setControls({ email: false, emailValid: false, role: false })
   }
 
   const options = [
@@ -46,6 +49,7 @@ const ForgotPassword = () => {
 
       const newControls = {
         email: data.email.trim() === '',
+        emailValid: mailCheck(data.email.trim()),
         role: data.role === 0
       }
 
@@ -99,9 +103,9 @@ const ForgotPassword = () => {
           <Grid item xs={10} md={10}>
             {' '}
             <FormControl fullWidth>
-              <InputLabel>Type</InputLabel>
+              <InputLabel>Role</InputLabel>
               <Select
-                label='Type'
+                label='Role'
                 className={`h-12 md:h-[60px] ${controls?.role === true ? 'isReq' : ''}`}
                 value={data?.role || null}
                 onChange={(e: any) => {
@@ -127,10 +131,10 @@ const ForgotPassword = () => {
                 ))}
               </Select>
             </FormControl>
-            {controls?.role === true ? <span className='errmsg'>Veuillez saisir le type !</span> : null}
+            {controls?.role === true ? <span className='errmsg'>Veuillez saisir le role !</span> : null}
           </Grid>
           <TextField
-            value={data?.email || null}
+            value={data?.email ?? ''}
             fullWidth
             label='Email'
             InputLabelProps={{ sx: { fontSize: '1rem' } }}
@@ -139,22 +143,25 @@ const ForgotPassword = () => {
             }}
             className={`${controls?.email === true ? 'isReq' : ''}`}
             onChange={(e: any) => {
-              if (e.target?.value.trim() === '') {
-                setControls({ ...controls, email: true })
-                setData((prev: any) => ({
-                  ...prev,
-                  email: e.target.value
-                }))
-              } else {
-                setControls({ ...controls, email: false })
-                setData((prev: any) => ({
-                  ...prev,
-                  email: e.target.value
-                }))
-              }
+              const value = e.target.value
+              const isEmpty = value.trim() === ''
+              const isInvalid = mailCheck(value.trim())
+
+              setData((prev: any) => ({ ...prev, email: value }))
+              setControls((prev: any) => ({
+                ...prev,
+                email: isEmpty,
+                emailValid: !isEmpty && isInvalid
+              }))
             }}
           />
-          {controls?.email === true ? <span className='errmsg'>Veuillez saisir l’adresse e-mail !</span> : null}
+          {controls?.email === true ? (
+            <span className='errmsg'>Veuillez saisir l’email !</span>
+          ) : controls.emailValid === true ? (
+            <span className='errmsg'>
+              Email invalide : il doit contenir @ et se terminer par un domaine valide (ex: .com, .net)
+            </span>
+          ) : null}
           <Button
             fullWidth
             variant='contained'

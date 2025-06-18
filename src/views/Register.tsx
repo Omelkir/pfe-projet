@@ -22,7 +22,7 @@ const Register = () => {
   const ageCheck = (age: any) => {
     const num = Number(age)
 
-    return !isNaN(num) && num >= 18 && num <= 60
+    return isNaN(num) || num <= 12
   }
 
   const tarifCheck = (tarif: any) => {
@@ -149,6 +149,8 @@ const Register = () => {
     email: false,
     mdp: false,
     conMdp: false,
+    mdpValid: false,
+    conMdpValid: false,
     emailValid: false,
     tel: false,
     telValid: false,
@@ -204,6 +206,8 @@ const Register = () => {
       email: false,
       mdp: false,
       conMdp: false,
+      mdpValid: false,
+      conMdpValid: false,
       emailValid: false,
       tel: false,
       telValid: false,
@@ -235,6 +239,7 @@ const Register = () => {
         conMdpValid: passwordCheck(data.conMdp.trim()),
         mdp: data.mdp.trim() === '',
         conMdp: data.conMdp.trim() === '',
+        mismatch: data.mdp.trim() !== data.conMdp.trim(),
         role: data.role === 0,
         ...(data.role === 4 && {
           age: data.age.trim() === '',
@@ -261,7 +266,7 @@ const Register = () => {
           mode_pre: data.mode_pre === 0,
           id_ville: data.id_ville === 0,
           adresse: data.adresse.trim() === '',
-          addressCheck: phoneCheck(data.adresse.trim()),
+          addressCheck: addressCheck(data.adresse.trim()),
           heurD: data.heurD.trim() === '',
           heurF: data.heurF.trim() === ''
         })
@@ -539,7 +544,7 @@ const Register = () => {
                     setControls((prev: any) => ({
                       ...prev,
                       age: isEmpty,
-                      ageValid: !isEmpty && !isInvalid
+                      ageValid: isInvalid
                     }))
                   }}
                   InputLabelProps={{
@@ -562,7 +567,7 @@ const Register = () => {
                 {controls?.age === true ? (
                   <span className='errmsg'>Veuillez saisir l’age !</span>
                 ) : controls.ageValid === true ? (
-                  <span className='errmsg'>Âge invalide : il doit être un nombre entre 18 et 60 ans</span>
+                  <span className='errmsg'>Âge invalide : il doit être un nombre supérieur à 12 ans</span>
                 ) : null}
               </Grid>
             ) : null}
@@ -748,7 +753,7 @@ const Register = () => {
                 <Select
                   label='Ville'
                   className={`${controls?.id_ville === true ? 'isReq' : ''}`}
-                  value={data?.id_ville ?? ''}
+                  value={data?.id_ville || null}
                   onChange={(e: any) => {
                     if (e === null) {
                       setControls({ ...controls, id_ville: true })
@@ -1062,6 +1067,8 @@ const Register = () => {
                   Mot de passe invalide : il doit contenir au moins 8 caractères, une majuscule, une minuscule, un
                   chiffre et un caractère spécial (ex: @, $, !).
                 </span>
+              ) : data.mdp !== data.conMdp && data.conMdp !== '' ? (
+                <span className='errmsg'>Les mots de passe ne correspondent pas.</span>
               ) : null}
             </Grid>
             {data?.role === 2 || data?.role === 3 ? (

@@ -29,7 +29,7 @@ const Table = ({
 
   async function getLaboratoiresList(page = 1) {
     try {
-      const url = `${window.location.origin}/api/laboratoire/liste?approuve=0&page=${page}`
+      const url = `${window.location.origin}/api/laboratoire/liste?approuve=0&archive=0&page=${page}`
 
       const requestOptions = {
         method: 'GET',
@@ -54,13 +54,17 @@ const Table = ({
     }
   }
 
-  const handleChange = async (id: number) => {
+  const handleChange = async (row: any) => {
     try {
+      console.log('row', row)
+
       const response = await fetch(`${window.location.origin}/api/approve-laboratoire/modifier`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: id
+          id: row.id,
+          email: row.email,
+          nom_ut: row.nom_ut
         })
       })
 
@@ -91,8 +95,8 @@ const Table = ({
                 <th>Nom Utilisateur</th>
                 <th>Email</th>
                 <th>Ville</th>
-                <th>Spéciallité</th>
-                <th className='text-center'>Approuvé</th>
+                <th>Mode de prélèvement</th>
+                <th className='text-center'>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -115,14 +119,22 @@ const Table = ({
                     <Typography>{row.ville}</Typography>
                   </td>
                   <td className='!plb-1'>
-                    <Typography>{row.spe}</Typography>
+                    <Typography>
+                      {row.mode_pre === 1
+                        ? 'Prélèvement sur place au laboratoire'
+                        : row.mode_pre === 0
+                          ? 'Prélèvement à domicile'
+                          : row.mode_pre === 2
+                            ? 'Prélèvement sur place au laboratoire et à domicile'
+                            : 'Prélèvement non défini'}
+                    </Typography>
                   </td>
                   <td className='flex justify-center gap-2'>
                     <Check
                       className='text-green-600 text-xl font-bold cursor-pointer hover:text-2xl'
                       strokeWidth={3}
                       onClick={async () => {
-                        await handleChange(row.id)
+                        await handleChange(row)
                       }}
                     />
 

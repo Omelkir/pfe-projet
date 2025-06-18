@@ -61,7 +61,7 @@ const Reclamation = () => {
 
   return (
     <div>
-      <Card>
+      <Card className='min-h-screen'>
         <CardContent>
           <Arrow title='Dashboard' subTitle='Réclamation' />
 

@@ -14,52 +14,38 @@ import { getStorageData } from '@/utils/helpers'
 
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'), { ssr: false })
 
-const PatientChart = () => {
-  const [series, setSeries] = useState([{ name: 'Total Patients', data: Array(12).fill(0) }])
+const LaboratoiresChart = () => {
+  const [series, setSeries] = useState([{ name: 'Total Laboratoires', data: Array(12).fill(0) }])
   const userData = getStorageData('user')
 
   useEffect(() => {
-    const fetchPatients = async () => {
+    const fetchLaboratoires = async () => {
       try {
-        let url = ''
-
-        if (userData?.role === 1) {
-          url = `${window.location.origin}/api/statistique-admin/statistique`
-        } else if (userData?.role === 2 || userData?.role === 3) {
-          url = `${window.location.origin}/api/statistique-medecin/statistique?id_el=${userData?.id}&el=${userData?.role}`
-        } else {
-          return
-        }
-
+        const url = `${window.location.origin}/api/statistique-admin/statistique`
         const response = await fetch(url)
         const res = await response.json()
 
-        if (!res.erreur && res.statistiquesPatient?.patientsParMois) {
-          setSeries([{ name: 'Total Patients', data: res.statistiquesPatient.patientsParMois }])
+        if (!res.erreur && res.statistiquesLabo?.labosParMois) {
+          setSeries([{ name: 'Total Laboratoires', data: res.statistiquesLabo.labosParMois }])
         }
       } catch (error) {
-        console.error('Erreur chargement patients:', error)
+        console.error('Erreur chargement laboratoires:', error)
       }
     }
 
-    fetchPatients()
-  }, [userData?.role])
+    fetchLaboratoires()
+  }, [])
 
   const options: ApexOptions = {
     chart: { type: 'line', height: 350, toolbar: { show: false } },
-    colors: ['#ff5a39'],
+    colors: ['#0ebb13'],
     stroke: { width: 3, curve: 'smooth' },
     markers: { size: 5 },
     xaxis: {
       categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       labels: { style: { colors: 'var(--mui-palette-text-secondary)' } }
     },
-    yaxis: {
-      labels: {
-        style: { colors: 'var(--mui-palette-text-secondary)' },
-        formatter: value => Math.round(value).toString()
-      }
-    },
+    yaxis: { labels: { style: { colors: 'var(--mui-palette-text-secondary)' } } },
     legend: {
       position: 'top',
       horizontalAlign: 'right',
@@ -71,11 +57,11 @@ const PatientChart = () => {
   return (
     <Card>
       <CardContent>
-        <Typography variant='h6' gutterBottom sx={{ fontSize: 20, fontWeight: 'bold', color: '#ff5a39' }}>
-          Évolution des Patients
+        <Typography variant='h6' gutterBottom sx={{ fontSize: 20, fontWeight: 'bold', color: '#0ebb13' }}>
+          Évolution des Laboratoires
         </Typography>
         <Typography variant='body2' color='text.secondary' gutterBottom>
-          Nombre total de patients par mois
+          Nombre total de laboratoires par mois
         </Typography>
         <AppReactApexCharts type='line' height={350} options={options} series={series} />
       </CardContent>
@@ -83,4 +69,4 @@ const PatientChart = () => {
   )
 }
 
-export default PatientChart
+export default LaboratoiresChart

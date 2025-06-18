@@ -14,7 +14,7 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
-import { Input } from '@mui/material'
+import { IconButton, Input, InputAdornment } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
@@ -22,22 +22,64 @@ import { getStorageData } from '@/utils/helpers'
 
 const AccountDetails = () => {
   const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
+
+  const tarifCheck = (tarif: any) => {
+    const num = Number(tarif)
+
+    return isNaN(num) || num <= 0
+  }
+
+  const addressCheck = (address: string) => !/^[\wÀ-ÿ0-9\s,.'\-]{5,100}$/.test(address.trim())
+
+  const passwordCheck = (password: any) =>
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
+
   const userData = getStorageData('user')
 
   console.log('userData:', userData)
 
+  const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [isPasswordShown2, setIsPasswordShown2] = useState(false)
+  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const handleClickShowPassword2 = () => setIsPasswordShown2(show => !show)
+
   const [data, setData] = useState<any>({
     imageSrc: '/img/placeholder-image.jpg',
+    adresse: '',
     image: '',
     email: '',
+    mdp: '',
+    conMdp: '',
+    role: 0,
     tarif: '',
-    adresse: '',
     id_ville: 0,
     heurD: '',
     heurF: '',
     info: '',
     nom_ut: '',
-    spe: 0
+    id_spe: 0,
+    mode_pre: 0
+  })
+
+  const [controls, setControls] = useState<any>({
+    adresse: false,
+    addressValid: false,
+    email: false,
+    mdp: false,
+    conMdp: false,
+    mdpValid: false,
+    conMdpValid: false,
+    emailValid: false,
+    nom_ut: false,
+    mode_pre: false,
+    spe: false,
+    id_ville: false,
+    id_spe: false,
+    heurD: false,
+    heurF: false,
+    tarif: false,
+    tarifValid: false
   })
 
   const [compte, setCompte] = useState<any[]>([])
@@ -51,7 +93,7 @@ const AccountDetails = () => {
       } else if (userData?.role == 2) {
         url = `${window.location.origin}/api/medecin/liste?m.id=${userData?.id}`
       } else if (userData?.role == 3) {
-        url = `${window.location.origin}/api/laboratoire/liste?l.id=${userData?.id}`
+        url = `${window.location.origin}/api/laboratoire/liste?id=${userData?.id}`
       }
 
       const requestOptions = {
@@ -84,6 +126,7 @@ const AccountDetails = () => {
       const c = compte[0]
 
       setData((prev: any) => ({
+        id: c?.id,
         ...prev,
         nom_ut: c.nom_ut,
         email: c.email,
@@ -94,6 +137,8 @@ const AccountDetails = () => {
         heurF: c.heurF,
         info: c.info,
         id_spe: c.id_spe,
+        mdp: c.mdp,
+        conMdp: c.mdp,
         imageSrc: c.image ? `${window.location.origin}/${c.image}` : '/img/placeholder-image.jpg'
       }))
     }
@@ -114,12 +159,6 @@ const AccountDetails = () => {
       reader.readAsDataURL(file)
     }
   }
-
-  const [controls, setControls] = useState<any>({
-    email: false,
-    emailValid: false,
-    nom_ut: false
-  })
 
   const [villeListe, setVilleListe] = useState<any[]>([])
   const [speListe, setSpeListe] = useState<any[]>([])
@@ -190,12 +229,44 @@ const AccountDetails = () => {
 
   const handleSave = async () => {
     try {
-      const url = `${window.location.origin}/api/medecin/modifier`
+      let url = ''
+
+      if (userData?.role == 1) {
+        url = `${window.location.origin}/api/admin/modifier?id=${userData?.id}`
+      } else if (userData?.role == 2) {
+        url = `${window.location.origin}/api/medecin/modifier?m.id=${userData?.id}`
+      } else if (userData?.role == 3) {
+        url = `${window.location.origin}/api/laboratoire/modifier?id=${userData?.id}`
+      }
 
       const newControls = {
         email: data.email.trim() === '',
         emailValid: mailCheck(data.email.trim()),
-        nom_ut: data.nom_ut.trim() === ''
+        mdpValid: passwordCheck(data.mdp.trim()),
+        conMdpValid: passwordCheck(data.conMdp.trim()),
+        mdp: data.mdp.trim() === '',
+        conMdp: data.conMdp.trim() === '',
+        mismatch: data.mdp.trim() !== data.conMdp.trim(),
+        ...(userData?.role === 2 && {
+          nom_ut: data.nom_ut.trim() === '',
+          id_spe: data.id_spe === 0,
+          id_ville: data.id_ville === 0,
+          adresse: data.adresse.trim() === '',
+          addressValid: addressCheck(data.adresse.trim()),
+          heurD: data.heurD.trim() === '',
+          heurF: data.heurF.trim() === '',
+          tarif: data.tarif.trim() === '',
+          tarifValid: tarifCheck(data.tarif.trim())
+        }),
+        ...(userData?.role === 3 && {
+          nom_ut: data.nom_ut.trim() === '',
+          mode_pre: data.mode_pre === 0,
+          id_ville: data.id_ville === 0,
+          adresse: data.adresse.trim() === '',
+          addressCheck: addressCheck(data.adresse.trim()),
+          heurD: data.heurD.trim() === '',
+          heurF: data.heurF.trim() === ''
+        })
       }
 
       setControls(newControls)
@@ -235,7 +306,7 @@ const AccountDetails = () => {
   }
 
   return (
-    <Card className='w-full m-auto'>
+    <Card className='w-full m-auto min-h-screen'>
       <CardContent className='mbe-5'>
         <div className='flex max-sm:flex-col items-center gap-6'>
           <div className='flex flex-col sm:flex-row gap-4'>
@@ -313,13 +384,15 @@ const AccountDetails = () => {
                     }))
                   }
                 }}
-                autoFocus
                 InputLabelProps={{
-                  sx: { fontSize: '1rem' }
+                  sx: {
+                    fontSize: '1rem'
+                  }
                 }}
                 InputProps={{
                   sx: {
-                    height: 60,
+                    height: 60, // md and up
+                    fontSize: '1rem', // 16px
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -337,11 +410,14 @@ const AccountDetails = () => {
                 fullWidth
                 label='Email'
                 InputLabelProps={{
-                  sx: { fontSize: '1rem' }
+                  sx: {
+                    fontSize: '1rem'
+                  }
                 }}
                 InputProps={{
                   sx: {
-                    height: 60,
+                    height: 60, // md and up
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -352,20 +428,16 @@ const AccountDetails = () => {
                 value={data?.email ?? ''}
                 className={`${controls?.email === true || controls.emailValid === true ? 'isReq' : ''}`}
                 onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, email: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      email: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, email: false })
-                    setControls({ ...controls, emailValid: mailCheck(e.target.value.trim()) })
-                    setData((prev: any) => ({
-                      ...prev,
-                      email: e.target.value
-                    }))
-                  }
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = mailCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, email: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    email: isEmpty,
+                    emailValid: !isEmpty && isInvalid
+                  }))
                 }}
               />
               {controls?.email === true ? (
@@ -377,179 +449,394 @@ const AccountDetails = () => {
               ) : null}
             </Grid>
 
-            <Grid item xs={6} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Spéciallité</InputLabel>
-                <Select
-                  label='Spéciallité'
-                  value={data?.id_spe ?? ''}
-                  onChange={(e: any) => {
-                    if (e === null) {
-                      setData({ ...data, id_spe: e.target.value })
-                    } else {
-                      setData({ ...data, id_spe: e.target.value })
+            {userData?.role === 2 ? (
+              <Grid item xs={6} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Spéciallité</InputLabel>
+                  <Select
+                    label='Spéciallité'
+                    value={data?.id_spe || null}
+                    className={`${controls?.id_spe === true ? 'isReq' : ''}`}
+                    onChange={(e: any) => {
+                      if (e === null) {
+                        setControls({ ...controls, id_spe: true })
+                        setData((prev: any) => ({
+                          ...prev,
+                          id_spe: e.target.value
+                        }))
+                      } else {
+                        setControls({ ...controls, id_spe: false })
+                        setData((prev: any) => ({
+                          ...prev,
+                          id_spe: e.target.value
+                        }))
+                      }
+                    }}
+                  >
+                    {speListe.map(item => (
+                      <MenuItem value={item.id} key={item.id}>
+                        {item.spe}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {controls?.id_spe === true ? (
+                  <span className='errmsg'>Veuillez sélectionner la spéciallité !</span>
+                ) : null}
+              </Grid>
+            ) : null}
+            {userData?.role === 2 ? (
+              <Grid item xs={6} md={6}>
+                <TextField
+                  fullWidth
+                  label='Tarif'
+                  value={data?.tarif ?? ''}
+                  className={`${controls?.tarif === true || controls.tarifValid === true ? 'isReq' : ''}`}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '1rem'
                     }
                   }}
-                >
-                  {speListe.map(item => (
-                    <MenuItem value={item.id} key={item.id}>
-                      {item.spe}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={6} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Ville</InputLabel>
-                <Select
-                  label='Ville'
-                  value={data?.id_ville ?? ''}
-                  onChange={(e: any) => {
-                    if (e === null) {
-                      setData({ ...data, id_ville: e.target.value })
-                    } else {
-                      setData({ ...data, id_ville: e.target.value })
+                  InputProps={{
+                    sx: {
+                      height: 60,
+                      fontSize: '1rem',
+                      '&.Mui-focused': {
+                        '& + .MuiInputLabel-root': {
+                          fontSize: '1rem'
+                        }
+                      }
                     }
                   }}
-                >
-                  {villeListe.map(item => (
-                    <MenuItem value={item.id} key={item.id}>
-                      {item.ville}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6} md={6}>
-              <TextField
-                fullWidth
-                label='Tarif'
-                value={data?.tarif ?? ''}
-                onChange={(e: any) => {
-                  setData((prev: any) => ({
-                    ...prev,
-                    tarif: e.target.value
-                  }))
-                }}
-                autoFocus
-                InputLabelProps={{
-                  sx: { fontSize: '1rem' }
-                }}
-                InputProps={{
-                  sx: {
-                    height: 60,
-                    '&.Mui-focused': {
-                      '& + .MuiInputLabel-root': {
-                        fontSize: '1rem'
-                      }
-                    }
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={6} md={6}>
-              <TextField
-                fullWidth
-                label='Adresse'
-                value={data?.adresse ?? ''}
-                onChange={(e: any) => {
-                  setData((prev: any) => ({
-                    ...prev,
-                    adresse: e.target.value
-                  }))
-                }}
-                autoFocus
-                InputLabelProps={{
-                  sx: { fontSize: '1rem' }
-                }}
-                InputProps={{
-                  sx: {
-                    height: 60,
-                    '&.Mui-focused': {
-                      '& + .MuiInputLabel-root': {
-                        fontSize: '1rem'
-                      }
-                    }
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={6} md={6}>
-              <TextField
-                fullWidth
-                type='time'
-                value={data?.heurD ?? ''}
-                onChange={(e: any) => {
-                  setData((prev: any) => ({
-                    ...prev,
-                    heurD: e.target.value
-                  }))
-                }}
-                autoFocus
-                InputLabelProps={{
-                  sx: { fontSize: '1rem' }
-                }}
-                InputProps={{
-                  sx: {
-                    height: 60,
-                    '&.Mui-focused': {
-                      '& + .MuiInputLabel-root': {
-                        fontSize: '1rem'
-                      }
-                    }
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={6} md={6}>
-              <TextField
-                fullWidth
-                type='time'
-                value={data?.heurF ?? ''}
-                onChange={(e: any) => {
-                  setData((prev: any) => ({
-                    ...prev,
-                    heurF: e.target.value
-                  }))
-                }}
-                autoFocus
-                InputLabelProps={{
-                  sx: { fontSize: '1rem' }
-                }}
-                InputProps={{
-                  sx: {
-                    height: 60,
-                    '&.Mui-focused': {
-                      '& + .MuiInputLabel-root': {
-                        fontSize: '1rem'
-                      }
-                    }
-                  }
-                }}
-              />
-            </Grid>
+                  onChange={(e: any) => {
+                    const value = e.target.value
+                    const isEmpty = value.trim() === ''
+                    const isInvalid = tarifCheck(value.trim())
 
-            <Grid item xs={12} md={12}>
+                    setData((prev: any) => ({ ...prev, tarif: value }))
+                    setControls((prev: any) => ({
+                      ...prev,
+                      tarif: isEmpty,
+                      tarifValid: isInvalid
+                    }))
+                  }}
+                />
+                {controls?.tarif === true ? (
+                  <span className='errmsg'>Veuillez saisir le tarif !</span>
+                ) : controls.tarifValid === true ? (
+                  <span className='errmsg'>Le tarif est invalide : il doit être un nombre.</span>
+                ) : null}
+              </Grid>
+            ) : null}
+            {userData?.role === 2 || userData?.role === 3 ? (
+              <Grid item xs={6} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Ville</InputLabel>
+                  <Select
+                    label='Ville'
+                    className={`${controls?.id_ville === true ? 'isReq' : ''}`}
+                    value={data?.id_ville || null}
+                    onChange={(e: any) => {
+                      if (e === null) {
+                        setControls({ ...controls, id_ville: true })
+                        setData((prev: any) => ({
+                          ...prev,
+                          id_ville: e.target.value
+                        }))
+                      } else {
+                        setControls({ ...controls, id_ville: false })
+                        setData((prev: any) => ({
+                          ...prev,
+                          id_ville: e.target.value
+                        }))
+                      }
+                    }}
+                  >
+                    {villeListe.map(item => (
+                      <MenuItem value={item.id} key={item.id}>
+                        {item.ville}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {controls?.id_ville === true ? <span className='errmsg'>Veuillez sélectionner la ville!</span> : null}
+              </Grid>
+            ) : null}
+            {userData?.role === 2 || userData?.role === 3 ? (
+              <Grid item xs={data.role == 2 ? 6 : 12} md={data.role == 2 ? 6 : 12}>
+                <TextField
+                  fullWidth
+                  label='Adresse'
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '1rem'
+                    }
+                  }}
+                  InputProps={{
+                    sx: {
+                      height: 60,
+                      fontSize: '1rem',
+                      '&.Mui-focused': {
+                        '& + .MuiInputLabel-root': {
+                          fontSize: '1rem'
+                        }
+                      }
+                    }
+                  }}
+                  value={data?.adresse ?? ''}
+                  className={`${controls?.adresse === true || controls.addressValid === true ? 'isReq' : ''}`}
+                  onChange={(e: any) => {
+                    const value = e.target.value
+                    const isEmpty = value.trim() === ''
+                    const isInvalid = addressCheck(value.trim())
+
+                    setData((prev: any) => ({ ...prev, adresse: value }))
+                    setControls((prev: any) => ({
+                      ...prev,
+                      adresse: isEmpty,
+                      addressValid: !isEmpty && isInvalid
+                    }))
+                  }}
+                />
+                {controls?.adresse === true ? (
+                  <span className='errmsg'>Veuillez saisir l’adresse !</span>
+                ) : controls.addressValid === true ? (
+                  <span className='errmsg'>
+                    <span className='errmsg'>
+                      Adresse invalide : elle doit contenir au moins 5 caractères et ne pas inclure de symboles spéciaux
+                      non autorisés.
+                    </span>
+                  </span>
+                ) : null}
+              </Grid>
+            ) : null}
+            {userData?.role === 2 || userData?.role === 3 ? (
+              <Grid item xs={6} md={6}>
+                <TextField
+                  fullWidth
+                  type='time'
+                  className={`${controls?.heurD === true ? 'isReq' : ''}`}
+                  value={data?.heurD ?? ''}
+                  onChange={(e: any) => {
+                    if (e.target?.value.trim() === '') {
+                      setControls({ ...controls, heurD: true })
+                      setData((prev: any) => ({
+                        ...prev,
+                        heurD: e.target.value
+                      }))
+                    } else {
+                      setControls({ ...controls, heurD: false })
+                      setData((prev: any) => ({
+                        ...prev,
+                        heurD: e.target.value
+                      }))
+                    }
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '1rem'
+                    }
+                  }}
+                  InputProps={{
+                    sx: {
+                      height: 60,
+                      fontSize: '1rem',
+                      '&.Mui-focused': {
+                        '& + .MuiInputLabel-root': {
+                          fontSize: '1rem'
+                        }
+                      }
+                    }
+                  }}
+                />
+                {controls?.heurD === true ? (
+                  <span className='errmsg'>Veuillez sélectionner l’heure de début de travail !</span>
+                ) : null}
+              </Grid>
+            ) : null}
+            {userData?.role === 2 || userData?.role === 3 ? (
+              <Grid item xs={6} md={6}>
+                <TextField
+                  fullWidth
+                  type='time'
+                  className={`${controls?.heurF === true ? 'isReq' : ''}`}
+                  value={data?.heurF ?? ''}
+                  onChange={(e: any) => {
+                    if (e.target?.value.trim() === '') {
+                      setControls({ ...controls, heurF: true })
+                      setData((prev: any) => ({
+                        ...prev,
+                        heurF: e.target.value
+                      }))
+                    } else {
+                      setControls({ ...controls, heurF: false })
+                      setData((prev: any) => ({
+                        ...prev,
+                        heurF: e.target.value
+                      }))
+                    }
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '1rem'
+                    }
+                  }}
+                  InputProps={{
+                    sx: {
+                      height: 60,
+                      fontSize: '1rem',
+                      '&.Mui-focused': {
+                        '& + .MuiInputLabel-root': {
+                          fontSize: '1rem'
+                        }
+                      }
+                    }
+                  }}
+                />
+                {controls?.heurF === true ? (
+                  <span className='errmsg'>Veuillez sélectionner l’heure de fin de travail !</span>
+                ) : null}
+              </Grid>
+            ) : null}
+            <Grid item xs={6} md={6}>
               <TextField
                 fullWidth
-                label='Informations complémentaires'
-                multiline
-                value={data?.info ?? ''}
+                value={data?.mdp ?? ''}
+                label='Mot de passe'
+                type={isPasswordShown ? 'text' : 'password'}
+                InputLabelProps={{
+                  sx: {
+                    fontSize: '1rem'
+                  }
+                }}
+                className={`${controls?.mdp === true || controls.mdpValid === true ? 'isReq' : ''}`}
+                InputProps={{
+                  sx: {
+                    height: 60,
+                    fontSize: '1rem',
+                    '&.Mui-focused': {
+                      '& + .MuiInputLabel-root': {
+                        fontSize: '1rem'
+                      }
+                    },
+                    paddingRight: 5
+                  },
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        size='large'
+                        edge='end'
+                        onClick={handleClickShowPassword}
+                        onMouseDown={e => e.preventDefault()}
+                      >
+                        <i className={isPasswordShown ? 'ri-eye-off-line text-2xl' : 'ri-eye-line text-2xl'} />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
                 onChange={(e: any) => {
-                  setData((prev: any) => ({
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = passwordCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, mdp: value }))
+                  setControls((prev: any) => ({
                     ...prev,
-                    info: e.target.value
+                    mdp: isEmpty,
+                    mdpValid: !isEmpty && isInvalid
                   }))
                 }}
-                minRows={2}
-                maxRows={2}
+              />
+              {controls?.mdp === true ? (
+                <span className='errmsg'>Veuillez saisir le mot de passe !</span>
+              ) : controls.mdpValid === true ? (
+                <span className='errmsg'>
+                  Mot de passe invalide : il doit contenir au moins 8 caractères, une majuscule, une minuscule, un
+                  chiffre et un caractère spécial (ex: @, $, !).
+                </span>
+              ) : null}
+            </Grid>
+            <Grid item xs={6} md={6}>
+              <TextField
+                fullWidth
+                value={data?.conMdp ?? ''}
+                label='Confirmation'
+                type={isPasswordShown2 ? 'text' : 'password'}
                 InputLabelProps={{
-                  sx: { fontSize: '1rem' }
+                  sx: {
+                    fontSize: '1rem'
+                  }
+                }}
+                className={`${controls?.conMdp === true || controls.conMdpValid === true ? 'isReq' : ''}`}
+                InputProps={{
+                  sx: {
+                    height: 60,
+                    fontSize: '1rem',
+                    '&.Mui-focused': {
+                      '& + .MuiInputLabel-root': {
+                        fontSize: '1rem'
+                      }
+                    },
+                    paddingRight: 5
+                  },
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        size='large'
+                        edge='end'
+                        onClick={handleClickShowPassword2}
+                        onMouseDown={e => e.preventDefault()}
+                      >
+                        <i className={isPasswordShown2 ? 'ri-eye-off-line text-2xl' : 'ri-eye-line text-2xl'} />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+                onChange={(e: any) => {
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = passwordCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, conMdp: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    conMdp: isEmpty,
+                    conMdpValid: !isEmpty && isInvalid
+                  }))
                 }}
               />
+              {controls?.conMdp === true ? (
+                <span className='errmsg'>Confirmez le mot de passe !</span>
+              ) : controls.conMdpValid === true ? (
+                <span className='errmsg'>
+                  Mot de passe invalide : il doit contenir au moins 8 caractères, une majuscule, une minuscule, un
+                  chiffre et un caractère spécial (ex: @, $, !).
+                </span>
+              ) : data.mdp !== data.conMdp && data.conMdp !== '' ? (
+                <span className='errmsg'>Les mots de passe ne correspondent pas.</span>
+              ) : null}
             </Grid>
+            {userData?.role === 2 || userData?.role === 3 ? (
+              <Grid item xs={12} md={12}>
+                <TextField
+                  fullWidth
+                  label='Informations complémentaires'
+                  multiline
+                  value={data?.info ?? ''}
+                  onChange={(e: any) => {
+                    setData((prev: any) => ({
+                      ...prev,
+                      info: e.target.value
+                    }))
+                  }}
+                  minRows={2}
+                  maxRows={2}
+                  InputLabelProps={{
+                    sx: { fontSize: '1rem' }
+                  }}
+                />
+              </Grid>
+            ) : null}
           </Grid>
         </form>
       </CardContent>

@@ -122,6 +122,7 @@ const Table = ({
                 <th>Téléphone</th>
                 <th>Ville</th>
                 {userData.role === 2 ? <th>Fiche</th> : null}
+                {userData.role === 3 ? <th>Analyses</th> : null}
                 <th className='text-center'>Action</th>
               </tr>
             </thead>
@@ -163,6 +164,16 @@ const Table = ({
                           className='ri-folder-line text-blue-500 text-xl hover:text-2xl'
                           onClick={() =>
                             window.open('/dashboard/fiche-patient?id=' + row.id, '_blank', 'noopener,noreferrer')
+                          }
+                        ></button>
+                      </td>
+                    ) : null}
+                    {userData.role === 3 ? (
+                      <td className='!plb-1'>
+                        <button
+                          className='ri-file-line text-blue-500 text-xl hover:text-2xl'
+                          onClick={() =>
+                            window.open('/dashboard/analyse-laboratoire?id=' + row.id, '_blank', 'noopener,noreferrer')
                           }
                         ></button>
                       </td>

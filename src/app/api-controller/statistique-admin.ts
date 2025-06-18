@@ -1,6 +1,6 @@
 import pool from '@/utils/connexion'
 
-export const statistiqueMedecin = async (req: any) => {
+export const statistiqueAdmin = async (req: any) => {
   try {
     const json: any = req
     const urlParams = new URLSearchParams(new URL(json.url).search)
@@ -18,7 +18,7 @@ export const statistiqueMedecin = async (req: any) => {
       }
     })
 
-    const sqlPatient = `SELECT * FROM relation_patient ${whereClause}`
+    const sqlPatient = `SELECT * FROM patient ${whereClause}`
     const [rowsPatient] = await pool.query(sqlPatient)
     const dataPatient: any = rowsPatient
 
@@ -31,17 +31,30 @@ export const statistiqueMedecin = async (req: any) => {
         patientsParMois[mois] += 1
       }
     })
-    const sqlRendezvous = `SELECT * FROM consultation ${whereClause}`
-    const [rowsRendezvous] = await pool.query(sqlRendezvous)
-    const dataRendezvous: any = rowsRendezvous
+    const sqlMedecin = `SELECT * FROM medecin ${whereClause}`
+    const [rowsMedecin] = await pool.query(sqlMedecin)
+    const dataMedecin: any = rowsMedecin
 
-    const rendezvousParMois = Array(12).fill(0)
+    const medecinsParMois = Array(12).fill(0)
 
-    dataRendezvous.forEach((rendezVous: any) => {
-      if (rendezVous.date_creation) {
-        const mois = new Date(rendezVous.date_creation).getMonth()
+    dataMedecin.forEach((medecin: any) => {
+      if (medecin.date) {
+        const mois = new Date(medecin.date).getMonth()
 
-        rendezvousParMois[mois] += 1
+        medecinsParMois[mois] += 1
+      }
+    })
+    const sqlLabo = `SELECT * FROM laboratoire ${whereClause}`
+    const [rowsLabo] = await pool.query(sqlLabo)
+    const dataLabo: any = rowsLabo
+
+    const labosParMois = Array(12).fill(0)
+
+    dataLabo.forEach((labo: any) => {
+      if (labo.date) {
+        const mois = new Date(labo.date).getMonth()
+
+        labosParMois[mois] += 1
       }
     })
 
@@ -52,10 +65,15 @@ export const statistiqueMedecin = async (req: any) => {
         patientsParMois,
         total: dataPatient.length
       },
-      dataRendezvous,
-      statistiquesRendezvous: {
-        rendezvousParMois,
-        total: dataRendezvous.length
+      dataMedecin,
+      statistiquesMedecin: {
+        medecinsParMois,
+        total: dataMedecin.length
+      },
+      dataLabo,
+      statistiquesLabo: {
+        labosParMois,
+        total: dataLabo.length
       }
     }
   } catch (error) {

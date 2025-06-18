@@ -57,7 +57,9 @@ const LoginFront = () => {
     })
     setControls({
       email: false,
-      mdp: false
+      emailValid: false,
+      mdp: false,
+      mdpValid: false
     })
   }
 

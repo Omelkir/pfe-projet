@@ -1,40 +1,50 @@
-// MUI Imports
 import { useEffect, useState } from 'react'
 
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
-
-// Components Imports
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material'
+import Grid from '@mui/material/Grid'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Button from '@mui/material/Button'
 
 import { toast } from 'react-toastify'
 
 import { IconAlertTriangle } from '@tabler/icons-react'
 
+import { Box } from '@mui/material'
+
 import { FaExclamationTriangle } from 'react-icons/fa'
 
-import CustomAvatar from '@core/components/mui/Avatar'
-
-// Styles Imports
 import tableStyles from '@core/styles/table.module.css'
+import { getStorageData } from '@/utils/helpers'
 import Pagination from '@/components/ui/pagination'
+import CustomAvatar from '@/@core/components/mui/Avatar'
 
-const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; setUpdate: any; update: string }) => {
+const TableArchive = ({
+  update,
+  setUpdate
+}: {
+  update: string
+  setUpdate: React.Dispatch<React.SetStateAction<string>>
+}) => {
   const [rowsData, setRowsData] = useState<any[]>([])
+  const userData = getStorageData('user')
   const [paginatorInfo, setPaginatorInfo] = useState<any>({ total: 6 })
-  const [confirmOpen, setConfirmOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [selectedLaboId, setSelectedLaboId] = useState<number | null>(null)
 
   const onPagination = (e: any) => {
-    getLaboratoireList(e)
+    getLaboratoireArchiveList(e)
   }
 
-  async function getLaboratoireList(page = 1) {
-    setIsLoading(true)
-
+  async function getLaboratoireArchiveList(page = 1) {
     try {
-      const url = `${window.location.origin}/api/laboratoire/liste?approuve=1&archive=0&page=${page}`
+      setIsLoading(true)
+      const url = `${window.location.origin}/api/laboratoire/liste?approuve=0&archive=1&page=${page}`
 
       const requestOptions = {
         method: 'GET',
@@ -47,10 +57,8 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
 
       const responseData = await response.json()
 
-      console.log('API Response:', responseData)
-
       if (responseData.erreur) {
-        console.log(responseData.message)
+        console.error('Erreur')
       } else {
         setRowsData(responseData.data)
         setPaginatorInfo(responseData?.paginatorInfo)
@@ -63,12 +71,12 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
   }
 
   useEffect(() => {
-    getLaboratoireList()
+    getLaboratoireArchiveList()
   }, [update])
 
   const handleChange = async (id: number) => {
     try {
-      const response = await fetch(`${window.location.origin}/api/archive/desactive-labo`, {
+      const response = await fetch(`${window.location.origin}/api/archive/active-labo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
@@ -78,13 +86,11 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
 
       if (!response.ok || result.erreur) {
         toast.error('Erreur !')
-        console.error('Erreur API:', result)
       } else {
-        toast.success('Le laboratoire a été archivé avec succès')
+        toast.success('Le laboratoire a été désarchivé avec succès')
         setUpdate(Date.now().toString())
       }
     } catch (err) {
-      console.error('Erreur fetch:', err)
       toast.error('Erreur !')
     }
   }
@@ -106,7 +112,7 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={4}>
+                  <td colSpan={5}>
                     <div className='text-center p-4'>Chargement...</div>
                   </td>
                 </tr>
@@ -142,15 +148,11 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
                     </td>
                     <td className='flex justify-center gap-2'>
                       <button
-                        className='ri-edit-box-line text-yellow-500 text-xl hover:text-2xl'
-                        onClick={() => onEdit(row)}
-                      ></button>
-                      <button
                         onClick={() => {
                           setSelectedLaboId(row.id)
                           setConfirmOpen(true)
                         }}
-                        className='ri-inbox-archive-fill text-red-500 text-xl hover:text-2xl'
+                        className='ri-inbox-unarchive-fill text-yellow-500 text-xl hover:text-2xl'
                       ></button>
                     </td>
                   </tr>
@@ -160,6 +162,7 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
           </table>
         </div>
       </Card>
+
       <Grid item xs={12} className='mt-6 justify-items-end'>
         <Pagination
           total={paginatorInfo.total}
@@ -168,19 +171,21 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
           onChange={onPagination}
         />
       </Grid>
+
+      {/* Modal de confirmation */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth='xs' fullWidth>
         <DialogTitle>
           <Box display='flex' alignItems='center' gap={1}>
-            <IconAlertTriangle color='error' />
+            <IconAlertTriangle color='warning' />
             <h1 className='block w-full text-center'>
-              <FaExclamationTriangle className='text-5xl text-red-500 mr-2' />
+              <FaExclamationTriangle className='text-5xl text-yellow-500 mr-2' />
             </h1>
           </Box>
         </DialogTitle>
 
         <DialogContent dividers className='mb-3 text-center'>
           <Typography color='text.secondary'>
-            Êtes-vous sûr de vouloir <strong>archiver ce laboratoire</strong> ?
+            Êtes-vous sûr de vouloir <strong>désarchiver ce laboratoire</strong> ?
           </Typography>
         </DialogContent>
 
@@ -195,7 +200,7 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
           <Button
             variant='contained'
             size='small'
-            color='error'
+            color='warning'
             onClick={async () => {
               if (selectedLaboId !== null) {
                 await handleChange(selectedLaboId)
@@ -213,4 +218,4 @@ const Table = ({ onEdit, setUpdate, update }: { onEdit: (labo: any) => void; set
   )
 }
 
-export default Table
+export default TableArchive

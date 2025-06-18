@@ -64,7 +64,7 @@ const Ville = () => {
 
   return (
     <div>
-      <Card>
+      <Card className='min-h-screen'>
         <CardContent>
           <Arrow title='Dashboard' subTitle='Ville' />
 
