@@ -186,6 +186,8 @@ export const modifier = async (req: any) => {
     const formData = await req.formData()
     const file = formData.get('image') as File
     let checkUrl = formData.get('currentImage') || ''
+    let motDePasse = ''
+    let hashedPassword = ''
 
     if (file && file.size > 0) {
       const bytes = await file.arrayBuffer()
@@ -209,9 +211,10 @@ export const modifier = async (req: any) => {
     formData.forEach((value: any, key: any) => {
       json[key] = value
     })
-
+    motDePasse = json.mdp
+    hashedPassword = await bcrypt.hash(motDePasse, 10)
     const id = json.id
-    const sql = `UPDATE medi_connect.laboratoire SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',id_ville='${json.id_ville}',heurD='${json.heurD}',heurF='${json.heurF}',info='${json.info}',mode_pre='${json.mode_pre}',adresse='${json.adresse}' where id='${id}'`
+    const sql = `UPDATE medi_connect.laboratoire SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',id_ville='${json.id_ville}',heurD='${json.heurD}',heurF='${json.heurF}',info='${json.info}',mode_pre='${json.mode_pre}',adresse='${json.adresse}',mdp='${hashedPassword} where id='${id}'`
 
     await pool.query(sql)
 

@@ -15,59 +15,123 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
-import { Input } from '@mui/material'
+import {
+  IconButton,
+  Input,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  Box,
+  DialogContent,
+  DialogActions
+} from '@mui/material'
+
+import { FaCheckCircle } from 'react-icons/fa'
 
 import { getStorageData } from '@/utils/helpersFront'
 
 const PatientProfil = () => {
   const router = useRouter()
   const mailCheck = (email: any) => !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)
+  const phoneCheck = (tel: any) => !/^[259]\d{7}$/.test(tel)
 
-  // const passwordCheck = (password: any) =>
-  //   !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
+  const ageCheck = (age: any) => {
+    const num = Number(age)
 
-  // const [isPasswordShown, setIsPasswordShown] = useState(false)
-  // const [isPasswordShown2, setIsPasswordShown2] = useState(false)
-  // const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+    return isNaN(num) || num <= 12
+  }
 
-  // const handleClickShowPassword2 = () => setIsPasswordShown2(show => !show)
+  const [open, setOpen] = useState(false)
+
+  const passwordCheck = (password: any) =>
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
+
+  const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [isPasswordShown2, setIsPasswordShown2] = useState(false)
+  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const handleClickShowPassword2 = () => setIsPasswordShown2(show => !show)
   const userData = getStorageData('user')
 
   console.log('userData?:', userData)
 
   const [data, setData] = useState<any>({
     imageSrc: '/img/placeholder-image.jpg',
-    image: '',
-    email: '',
-
-    // mdp: '',
-    // conMdp: '',
     nom: '',
     prenom: '',
-    id_ville: '',
-    tel: '',
-    age: ''
+    image: '',
+    email: '',
+    mdp: '',
+    conMdp: '',
+    age: '',
+    tel: ''
   })
 
-  useEffect(() => {
-    if (userData) {
-      setData((prev: any) => ({
-        ...prev,
-        id: userData?.id,
-        nom: userData?.nom,
-        prenom: userData?.prenom,
-        email: userData?.email,
+  const [controls, setControls] = useState<any>({
+    prenom: false,
+    nom_ut: false,
+    email: false,
+    mdp: false,
+    conMdp: false,
+    mdpValid: false,
+    conMdpValid: false,
+    emailValid: false,
+    age: false,
+    ageValid: false,
+    tel: false,
+    telValid: false
+  })
 
-        // mdp: userData?.mdp,
-        tel: userData?.tel,
-        id_ville: userData?.id_ville,
-        age: userData?.age,
-        imageSrc: userData?.image ? `${window.location.origin}/${userData?.image}` : '/img/placeholder-image.jpg'
-      }))
-    } else {
-      router.push('/loginFront')
+  const [compte, setCompte] = useState<any[]>([])
+
+  async function getCompte() {
+    try {
+      const url = `${window.location.origin}/api/patient/compte-patient?id=${userData?.id}`
+
+      const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      }
+
+      const response = await fetch(url, requestOptions)
+
+      if (!response.ok) throw new Error('Erreur lors de la requête')
+
+      const responseData = await response.json()
+
+      if (responseData.erreur) {
+        console.error('Erreur !')
+      } else {
+        setCompte(responseData.data)
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      alert('Une erreur est survenue lors de la récupération des données.')
     }
+  }
+
+  useEffect(() => {
+    getCompte()
   }, [])
+  useEffect(() => {
+    if (compte.length > 0) {
+      const c = compte[0]
+
+      setData((prev: any) => ({
+        id: c?.id,
+        ...prev,
+        nom: c.nom,
+        prenom: c.prenom,
+        email: c.email,
+        id_ville: c.id_ville,
+        age: c.age,
+        tel: c.tel,
+        mdp: '', //c.mdp,
+        conMdp: '', //: c.mdp,
+        imageSrc: c.image ? `${window.location.origin}/${c.image}` : '/img/placeholder-image.jpg'
+      }))
+    }
+  }, [compte])
 
   const handleImageChange = (e: any) => {
     const file = e.target.files[0]
@@ -83,18 +147,6 @@ const PatientProfil = () => {
       reader.readAsDataURL(file)
     }
   }
-
-  const [controls, setControls] = useState<any>({
-    email: false,
-    emailValid: false,
-    mdp: false,
-    conMdp: false,
-
-    // mdpValid: false,
-    // conMdpValid: false,
-    nom: false,
-    prenom: false
-  })
 
   const [villeListe, setVilleListe] = useState<any[]>([])
 
@@ -131,56 +183,67 @@ const PatientProfil = () => {
   }, [])
 
   const handleSave = async () => {
-    // try {
-    const url = `${window.location.origin}/api/patient/modifier`
+    try {
+      const url = `${window.location.origin}/api/patient/modifier?id=${userData?.id}`
 
-    const newControls = {
-      email: data.email.trim() === '',
+      const newControls = {
+        email: data.email.trim() === '',
+        emailValid: mailCheck(data.email.trim()),
+        age: data.age.trim() === '',
+        ageValid: ageCheck(data.age.trim()),
+        nom: data.nom.trim() === '',
+        tel: data.tel.trim() === '',
+        telValid: phoneCheck(data.tel.trim()),
+        prenom: data.prenom.trim() === '',
+        id_ville: data.id_ville === 0,
+        mdpValid:
+          compte[0]?.id !== 0
+            ? data.mdp.trim()?.length > 1 && passwordCheck(data.mdp.trim())
+            : passwordCheck(data.mdp.trim()),
+        conMdpValid:
+          compte[0]?.id !== 0
+            ? data.conMdp.trim()?.length > 1 && passwordCheck(data.conMdp.trim())
+            : passwordCheck(data.conMdp.trim()),
+        mdp: compte[0]?.id !== 0 ? data.mdp.trim()?.length > 1 && data.mdp.trim() === '' : data.mdp.trim() === '',
+        conMdp:
+          compte[0]?.id !== 0 ? data.conMdp.trim()?.length > 1 && data.conMdp.trim() === '' : data.conMdp.trim() === '',
+        mismatch: data.mdp.trim() !== data.conMdp.trim()
+      }
 
-      // mdp: data.mdp.trim() === '',
-      emailValid: mailCheck(data.email.trim()),
+      setControls(newControls)
 
-      // mdpValid: passwordCheck(data.mdp.trim()),
-      // conMdpValid: passwordCheck(data.conMdp.trim()),
-      nom: data.nom.trim() === '',
-      prenom: data.prenom.trim() === ''
-    }
+      if (Object.values(newControls).some(value => value)) {
+        return
+      }
 
-    setControls(newControls)
+      const formData = new FormData()
 
-    if (Object.values(newControls).some(value => value)) {
-      return
-    }
-
-    const formData = new FormData()
-
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        if (data[key] instanceof File) {
-          formData.append(key, data[key])
-        } else {
-          formData.append(key, data[key])
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          if (data[key] instanceof File) {
+            formData.append(key, data[key])
+          } else {
+            formData.append(key, data[key])
+          }
         }
       }
+
+      const requestOptions = {
+        method: 'POST',
+        body: formData
+      }
+
+      const response = await fetch(url, requestOptions)
+      const responseData = await response.json()
+
+      if (responseData.erreur) {
+        console.log('Erreur !')
+      } else {
+        setOpen(true)
+      }
+    } catch (error) {
+      console.log('Erreur:', error)
     }
-
-    const requestOptions = {
-      method: 'POST',
-      body: formData
-    }
-
-    const response = await fetch(url, requestOptions)
-    const responseData = await response.json()
-
-    if (responseData.erreur) {
-      console.log('Erreur !')
-    } else {
-      console.log('Le profil a été modifié avec succès')
-    }
-
-    // } catch (error) {
-    //   console.log('Erreur:', error)
-    // }
   }
 
   return (
@@ -262,13 +325,15 @@ const PatientProfil = () => {
                     }))
                   }
                 }}
-                autoFocus
                 InputLabelProps={{
-                  sx: { fontSize: '1rem' }
+                  sx: {
+                    fontSize: '1rem'
+                  }
                 }}
                 InputProps={{
                   sx: {
-                    height: 60,
+                    height: 60, // md and up
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -279,6 +344,7 @@ const PatientProfil = () => {
               />
               {controls?.nom === true ? <span className='errmsg'>Veuillez saisir le nom !</span> : null}
             </Grid>
+
             <Grid item xs={6} md={6}>
               <TextField
                 fullWidth
@@ -300,13 +366,15 @@ const PatientProfil = () => {
                     }))
                   }
                 }}
-                autoFocus
                 InputLabelProps={{
-                  sx: { fontSize: '1rem' }
+                  sx: {
+                    fontSize: '1rem'
+                  }
                 }}
                 InputProps={{
                   sx: {
-                    height: 60,
+                    height: 60, // md and up
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -315,18 +383,22 @@ const PatientProfil = () => {
                   }
                 }}
               />
-              {controls?.prenom === true ? <span className='errmsg'>Veuillez saisir le prénom !</span> : null}
+              {controls?.prenom === true ? <span className='errmsg'>Veuillez saisir le prenom !</span> : null}
             </Grid>
+
             <Grid item xs={6} md={6}>
               <TextField
                 fullWidth
                 label='Email'
                 InputLabelProps={{
-                  sx: { fontSize: '1rem' }
+                  sx: {
+                    fontSize: '1rem'
+                  }
                 }}
                 InputProps={{
                   sx: {
-                    height: 60,
+                    height: 60, // md and up
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -337,20 +409,16 @@ const PatientProfil = () => {
                 value={data?.email ?? ''}
                 className={`${controls?.email === true || controls.emailValid === true ? 'isReq' : ''}`}
                 onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, email: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      email: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, email: false })
-                    setControls({ ...controls, emailValid: mailCheck(e.target.value.trim()) })
-                    setData((prev: any) => ({
-                      ...prev,
-                      email: e.target.value
-                    }))
-                  }
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = mailCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, email: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    email: isEmpty,
+                    emailValid: !isEmpty && isInvalid
+                  }))
                 }}
               />
               {controls?.email === true ? (
@@ -367,12 +435,21 @@ const PatientProfil = () => {
                 <InputLabel>Ville</InputLabel>
                 <Select
                   label='Ville'
+                  className={`${controls?.id_ville === true ? 'isReq' : ''}`}
                   value={data?.id_ville ?? ''}
                   onChange={(e: any) => {
                     if (e === null) {
-                      setData({ ...data, id_ville: e.target.value })
+                      setControls({ ...controls, id_ville: true })
+                      setData((prev: any) => ({
+                        ...prev,
+                        id_ville: e.target.value
+                      }))
                     } else {
-                      setData({ ...data, id_ville: e.target.value })
+                      setControls({ ...controls, id_ville: false })
+                      setData((prev: any) => ({
+                        ...prev,
+                        id_ville: e.target.value
+                      }))
                     }
                   }}
                 >
@@ -383,8 +460,94 @@ const PatientProfil = () => {
                   ))}
                 </Select>
               </FormControl>
+              {controls?.id_ville === true ? <span className='errmsg'>Veuillez sélectionner la ville!</span> : null}
             </Grid>
-            {/* <Grid item xs={6} md={6}>
+            <Grid item xs={6} md={6}>
+              <TextField
+                fullWidth
+                label='Numéro de téléphone'
+                value={data?.tel ?? ''}
+                className={`${controls?.tel === true || controls.telValid === true ? 'isReq' : ''}`}
+                onChange={(e: any) => {
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = phoneCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, tel: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    tel: isEmpty,
+                    telValid: !isEmpty && isInvalid
+                  }))
+                }}
+                InputLabelProps={{
+                  sx: {
+                    fontSize: '1rem'
+                  }
+                }}
+                InputProps={{
+                  sx: {
+                    height: 60, // md and up
+                    fontSize: '1rem',
+                    '&.Mui-focused': {
+                      '& + .MuiInputLabel-root': {
+                        fontSize: '1rem'
+                      }
+                    }
+                  }
+                }}
+              />
+
+              {controls?.tel === true ? (
+                <span className='errmsg'>Veuillez saisir le numéro de téléphone !</span>
+              ) : controls.telValid === true ? (
+                <span className='errmsg'>
+                  Numéro de téléphone invalide : il doit contenir 8 chiffres et commencer par 2, 5 ou 9
+                </span>
+              ) : null}
+            </Grid>
+            <Grid item xs={6} md={6}>
+              <TextField
+                fullWidth
+                label='Âge'
+                value={data?.age ?? ''}
+                className={`${controls?.age === true || controls.ageValid === true ? 'isReq' : ''}`}
+                onChange={(e: any) => {
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = ageCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, age: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    age: isEmpty,
+                    ageValid: isInvalid
+                  }))
+                }}
+                InputLabelProps={{
+                  sx: {
+                    fontSize: '1rem'
+                  }
+                }}
+                InputProps={{
+                  sx: {
+                    height: 60,
+                    fontSize: '1rem',
+                    '&.Mui-focused': {
+                      '& + .MuiInputLabel-root': {
+                        fontSize: '1rem'
+                      }
+                    }
+                  }
+                }}
+              />
+              {controls?.age === true ? (
+                <span className='errmsg'>Veuillez saisir l’age !</span>
+              ) : controls.ageValid === true ? (
+                <span className='errmsg'>Âge invalide : il doit être un nombre supérieur à 12 ans</span>
+              ) : null}
+            </Grid>
+            <Grid item xs={6} md={6}>
               <TextField
                 fullWidth
                 value={data?.mdp ?? ''}
@@ -392,21 +555,14 @@ const PatientProfil = () => {
                 type={isPasswordShown ? 'text' : 'password'}
                 InputLabelProps={{
                   sx: {
-                    fontSize: '0.875rem',
-                    '@media (min-width:768px)': {
-                      fontSize: '1rem'
-                    }
+                    fontSize: '1rem'
                   }
                 }}
-                className={`${controls?.mdp === true ? 'isReq' : ''}`}
+                className={`${controls?.mdp === true || controls.mdpValid === true ? 'isReq' : ''}`}
                 InputProps={{
                   sx: {
-                    height: 48,
-                    fontSize: '0.875rem',
-                    '@media (min-width:768px)': {
-                      height: 60,
-                      fontSize: '1rem'
-                    },
+                    height: 60,
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -422,30 +578,22 @@ const PatientProfil = () => {
                         onClick={handleClickShowPassword}
                         onMouseDown={e => e.preventDefault()}
                       >
-                        <i
-                          className={
-                            isPasswordShown ? 'ri-eye-off-line text-xl md:text-2xl' : 'ri-eye-line text-xl md:text-2xl'
-                          }
-                        />
+                        <i className={isPasswordShown ? 'ri-eye-off-line text-2xl' : 'ri-eye-line text-2xl'} />
                       </IconButton>
                     </InputAdornment>
                   )
                 }}
                 onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, mdp: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      mdp: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, mdp: false })
-                    setControls({ ...controls, mdpValid: passwordCheck(e.target.value.trim()) })
-                    setData((prev: any) => ({
-                      ...prev,
-                      mdp: e.target.value
-                    }))
-                  }
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = passwordCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, mdp: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    mdp: isEmpty,
+                    mdpValid: !isEmpty && isInvalid
+                  }))
                 }}
               />
               {controls?.mdp === true ? (
@@ -465,21 +613,14 @@ const PatientProfil = () => {
                 type={isPasswordShown2 ? 'text' : 'password'}
                 InputLabelProps={{
                   sx: {
-                    fontSize: '0.875rem',
-                    '@media (min-width:768px)': {
-                      fontSize: '1rem'
-                    }
+                    fontSize: '1rem'
                   }
                 }}
-                className={`${controls?.conMdp === true ? 'isReq' : ''}`}
+                className={`${controls?.conMdp === true || controls.conMdpValid === true ? 'isReq' : ''}`}
                 InputProps={{
                   sx: {
-                    height: 48,
-                    fontSize: '0.875rem',
-                    '@media (min-width:768px)': {
-                      height: 60,
-                      fontSize: '1rem'
-                    },
+                    height: 60,
+                    fontSize: '1rem',
                     '&.Mui-focused': {
                       '& + .MuiInputLabel-root': {
                         fontSize: '1rem'
@@ -495,30 +636,22 @@ const PatientProfil = () => {
                         onClick={handleClickShowPassword2}
                         onMouseDown={e => e.preventDefault()}
                       >
-                        <i
-                          className={
-                            isPasswordShown2 ? 'ri-eye-off-line text-xl md:text-2xl' : 'ri-eye-line text-xl md:text-2xl'
-                          }
-                        />
+                        <i className={isPasswordShown2 ? 'ri-eye-off-line text-2xl' : 'ri-eye-line text-2xl'} />
                       </IconButton>
                     </InputAdornment>
                   )
                 }}
                 onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, conMdp: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      conMdp: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, conMdp: false })
-                    setControls({ ...controls, conMdpValid: passwordCheck(e.target.value.trim()) })
-                    setData((prev: any) => ({
-                      ...prev,
-                      conMdp: e.target.value
-                    }))
-                  }
+                  const value = e.target.value
+                  const isEmpty = value.trim() === ''
+                  const isInvalid = passwordCheck(value.trim())
+
+                  setData((prev: any) => ({ ...prev, conMdp: value }))
+                  setControls((prev: any) => ({
+                    ...prev,
+                    conMdp: isEmpty,
+                    conMdpValid: !isEmpty && isInvalid
+                  }))
                 }}
               />
               {controls?.conMdp === true ? (
@@ -528,87 +661,36 @@ const PatientProfil = () => {
                   Mot de passe invalide : il doit contenir au moins 8 caractères, une majuscule, une minuscule, un
                   chiffre et un caractère spécial (ex: @, $, !).
                 </span>
+              ) : data.mdp !== data.conMdp && data.conMdp !== '' ? (
+                <span className='errmsg'>Les mots de passe ne correspondent pas.</span>
               ) : null}
-            </Grid> */}
-            <Grid item xs={6} md={6}>
-              <TextField
-                fullWidth
-                label='Numéro téléphone'
-                value={data?.tel ?? ''}
-                className={`${controls?.tel === true ? 'isReq' : ''}`}
-                onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, tel: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      tel: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, tel: false })
-                    setData((prev: any) => ({
-                      ...prev,
-                      tel: e.target.value
-                    }))
-                  }
-                }}
-                autoFocus
-                InputLabelProps={{
-                  sx: { fontSize: '1rem' }
-                }}
-                InputProps={{
-                  sx: {
-                    height: 60,
-                    '&.Mui-focused': {
-                      '& + .MuiInputLabel-root': {
-                        fontSize: '1rem'
-                      }
-                    }
-                  }
-                }}
-              />
-              {controls?.tel === true ? <span className='errmsg'>Veuillez saisir le numéro de téléphone !</span> : null}
-            </Grid>
-            <Grid item xs={6} md={6}>
-              <TextField
-                fullWidth
-                label='Âge'
-                value={data?.age ?? ''}
-                className={`${controls?.age === true ? 'isReq' : ''}`}
-                onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
-                    setControls({ ...controls, age: true })
-                    setData((prev: any) => ({
-                      ...prev,
-                      age: e.target.value
-                    }))
-                  } else {
-                    setControls({ ...controls, age: false })
-                    setData((prev: any) => ({
-                      ...prev,
-                      age: e.target.value
-                    }))
-                  }
-                }}
-                autoFocus
-                InputLabelProps={{
-                  sx: { fontSize: '1rem' }
-                }}
-                InputProps={{
-                  sx: {
-                    height: 60,
-                    '&.Mui-focused': {
-                      '& + .MuiInputLabel-root': {
-                        fontSize: '1rem'
-                      }
-                    }
-                  }
-                }}
-              />
-              {controls?.age === true ? <span className='errmsg'>Veuillez saisir l’age !</span> : null}
             </Grid>
           </Grid>
         </form>
       </CardContent>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth='xs' fullWidth>
+        <DialogTitle>
+          <Box display='flex' alignItems='center' gap={1}>
+            <h1 className='block w-full text-center'>
+              <FaCheckCircle className='text-green-500 text-6xl' />
+            </h1>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent dividers className='mb-3 text-center'>
+          <div className='text-center px-4 space-y-2'>
+            <h3 className='text-lg font-semibold text-green-700'>
+              Votre profil a été <strong>modifié avec succès</strong>
+            </h3>
+          </div>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: 'flex-end', p: 2 }}>
+          <Button style={{ backgroundColor: 'white', color: 'black' }} size='small' onClick={() => setOpen(false)}>
+            Fermer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }
