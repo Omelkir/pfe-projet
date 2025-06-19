@@ -64,7 +64,7 @@ export const getNotification = async (req: any) => {
         vuno
       }
     } else if (paramsObj.el === '1') {
-      const sql = `SELECT n.*,a.nom_ut as nom_ut,a.image as image FROM notification n LEFT JOIN admin a ON n.id_patient = a.id ${whereClause}`
+      const sql = `SELECT n.*,a.nom_ut as nom_ut,a.image as image FROM notification n LEFT JOIN admin a ON n.id_patient = a.id ${whereClause} ORDER BY n.vu ASC`
 
       const [rows]: any = await pool.query(sql)
       const data = rows

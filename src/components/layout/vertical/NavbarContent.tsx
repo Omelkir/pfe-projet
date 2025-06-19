@@ -30,39 +30,41 @@ const NotificationDropdown = ({ notifications = [] }: { notifications: any[] }) 
         Notifications
       </Typography>
       <Divider />
-      <Table size='small'>
-        <TableBody>
-          {notifications.length > 0 ? (
-            notifications.map(notification => (
-              <TableRow key={notification.id} className={notification.vu === 0 ? 'bg-blue-100' : ''} hover>
-                <TableCell>
-                  <div className='flex gap-3 items-start'>
-                    <CustomAvatar src={notification.image} size={34} />
-                    <div>
-                      <Typography variant='subtitle2' color='text.primary' className='font-bold'>
-                        {notification.prenom} {notification.nom}
-                      </Typography>
-                      <Typography
-                        variant='body2'
-                        color='text.secondary'
-                        dangerouslySetInnerHTML={{ __html: notification.message }}
-                      />
+      <div className='max-h-[300px] overflow-y-auto'>
+        <Table size='small'>
+          <TableBody>
+            {notifications.length > 0 ? (
+              notifications.map(notification => (
+                <TableRow key={notification.id} className={notification.vu === 0 ? 'bg-blue-100' : ''} hover>
+                  <TableCell>
+                    <div className='flex gap-3 items-start'>
+                      <CustomAvatar src={notification.image} size={34} />
+                      <div>
+                        <Typography variant='subtitle2' color='text.primary' className='font-bold'>
+                          {notification.prenom} {notification.nom}
+                        </Typography>
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
+                          dangerouslySetInnerHTML={{ __html: notification.message }}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell>
+                  <Typography variant='body2' className='text-center'>
+                    Aucune notification pour le moment.
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell>
-                <Typography variant='body2' className='text-center'>
-                  Aucune notification pour le moment.
-                </Typography>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </Paper>
   )
 }
