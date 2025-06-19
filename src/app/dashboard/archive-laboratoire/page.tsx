@@ -18,7 +18,7 @@ const ArchiveLaboratoire = ({}: any) => {
     <div>
       <Card className='min-h-screen'>
         <CardContent>
-          <Arrow title='Dashboard' subTitle='Liste des médecins archivés' />
+          <Arrow title='Dashboard' subTitle='Liste des laboratoires archivés' />
           <div className='flex justify-end mb-3'>
             <Link
               className='underline cursor-pointer'

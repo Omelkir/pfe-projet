@@ -29,7 +29,7 @@ const AccountDetails = () => {
     return isNaN(num) || num <= 0
   }
 
-  const addressCheck = (address: string) => !/^[\wÀ-ÿ0-9\s,.'\-]{5,100}$/.test(address.trim())
+  const addressCheck = (address: string) => !/^[\wÀ-ÿ0-9\s,.'\-]{5,100}$/.test(address?.trim())
 
   const passwordCheck = (password: any) =>
     !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{8,}$/.test(password)
@@ -114,7 +114,7 @@ const AccountDetails = () => {
       }
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Une erreur est survenue lors de la récupération des données.')
+      console.log('Une erreur est survenue lors de la récupération des données.')
     }
   }
 
@@ -181,13 +181,13 @@ const AccountDetails = () => {
       console.log('API Response:', responseData)
 
       if (responseData.erreur) {
-        alert(responseData.message)
+        console.log(responseData.message)
       } else {
         setVilleListe(responseData.data)
       }
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Une erreur est survenue lors de la récupération des données.')
+      console.log('Une erreur est survenue lors de la récupération des données.')
     }
   }
 
@@ -213,13 +213,13 @@ const AccountDetails = () => {
       console.log('API Response:', responseData)
 
       if (responseData.erreur) {
-        alert(responseData.message)
+        console.log(responseData.message)
       } else {
         setSpeListe(responseData.data)
       }
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Une erreur est survenue lors de la récupération des données.')
+      console.log('Une erreur est survenue lors de la récupération des données.')
     }
   }
 
@@ -228,89 +228,96 @@ const AccountDetails = () => {
   }, [])
 
   const handleSave = async () => {
-    try {
-      let url = ''
+    console.log('bonjour', userData?.id)
 
-      if (userData?.role == 1) {
-        url = `${window.location.origin}/api/admin/modifier?id=${userData?.id}`
-      } else if (userData?.role == 2) {
-        url = `${window.location.origin}/api/medecin/modifier?m.id=${userData?.id}`
-      } else if (userData?.role == 3) {
-        url = `${window.location.origin}/api/laboratoire/modifier?id=${userData?.id}`
-      }
+    //  try {
+    let url = ''
 
-      const newControls = {
-        email: data.email.trim() === '',
-        emailValid: mailCheck(data.email.trim()),
+    if (userData?.role == 1) {
+      url = `${window.location.origin}/api/admin/modifier?id=${userData?.id}`
+    } else if (userData?.role == 2) {
+      url = `${window.location.origin}/api/medecin/modifier?m.id=${userData?.id}`
+    } else if (userData?.role == 3) {
+      url = `${window.location.origin}/api/laboratoire/modifier?id=${userData?.id}`
+    }
 
-        mdpValid:
-          compte[0]?.id !== 0
-            ? data.mdp.trim()?.length > 1 && passwordCheck(data.mdp.trim())
-            : passwordCheck(data.mdp.trim()),
-        conMdpValid:
-          compte[0]?.id !== 0
-            ? data.conMdp.trim()?.length > 1 && passwordCheck(data.conMdp.trim())
-            : passwordCheck(data.conMdp.trim()),
-        mdp: compte[0]?.id !== 0 ? data.mdp.trim()?.length > 1 && data.mdp.trim() === '' : data.mdp.trim() === '',
-        conMdp:
-          compte[0]?.id !== 0 ? data.conMdp.trim()?.length > 1 && data.conMdp.trim() === '' : data.conMdp.trim() === '',
-        mismatch: data.mdp.trim() !== data.conMdp.trim(),
-        ...(userData?.role === 2 && {
-          nom_ut: data.nom_ut.trim() === '',
-          id_spe: data.id_spe === 0,
-          id_ville: data.id_ville === 0,
-          adresse: data.adresse.trim() === '',
-          addressValid: addressCheck(data.adresse.trim()),
-          heurD: data.heurD.trim() === '',
-          heurF: data.heurF.trim() === '',
-          tarif: data.tarif.trim() === '',
-          tarifValid: tarifCheck(data.tarif.trim())
-        }),
-        ...(userData?.role === 3 && {
-          nom_ut: data.nom_ut.trim() === '',
-          mode_pre: data.mode_pre === 0,
-          id_ville: data.id_ville === 0,
-          adresse: data.adresse.trim() === '',
-          addressCheck: addressCheck(data.adresse.trim()),
-          heurD: data.heurD.trim() === '',
-          heurF: data.heurF.trim() === ''
-        })
-      }
+    console.log(data)
 
-      setControls(newControls)
+    const newControls = {
+      email: data.email?.trim() === '',
+      emailValid: mailCheck(data.email?.trim()),
 
-      if (Object.values(newControls).some(value => value)) {
-        return
-      }
+      mdpValid:
+        compte[0]?.id !== 0
+          ? data.mdp?.trim()?.length > 1 && passwordCheck(data.mdp?.trim())
+          : passwordCheck(data.mdp?.trim()),
+      conMdpValid:
+        compte[0]?.id !== 0
+          ? data.conMdp?.trim()?.length > 1 && passwordCheck(data.conMdp?.trim())
+          : passwordCheck(data.conMdp?.trim()),
+      mdp: compte[0]?.id !== 0 ? data.mdp?.trim()?.length > 1 && data.mdp?.trim() === '' : data.mdp?.trim() === '',
+      conMdp:
+        compte[0]?.id !== 0
+          ? data.conMdp?.trim()?.length > 1 && data.conMdp?.trim() === ''
+          : data.conMdp?.trim() === '',
+      mismatch: data.mdp?.trim() !== data.conMdp?.trim(),
+      ...(userData?.role === 2 && {
+        nom_ut: data.nom_ut?.trim() === '',
+        id_spe: data.id_spe === 0,
+        id_ville: data.id_ville === 0,
+        adresse: data.adresse?.trim() === '',
+        addressValid: addressCheck(data.adresse?.trim()),
+        heurD: data.heurD?.trim() === '',
+        heurF: data.heurF?.trim() === '',
+        tarif: data?.tarif?.toString()?.trim() === '',
+        tarifValid: tarifCheck(data?.tarif?.toString()?.trim())
+      }),
+      ...(userData?.role === 3 && {
+        nom_ut: data.nom_ut?.trim() === '',
+        mode_pre: data.mode_pre === 0,
+        id_ville: data.id_ville === 0,
+        adresse: data.adresse?.trim() === '',
+        addressCheck: addressCheck(data.adresse?.trim()),
+        heurD: data.heurD?.trim() === '',
+        heurF: data.heurF?.trim() === ''
+      })
+    }
 
-      const formData = new FormData()
+    setControls(newControls)
 
-      for (const key in data) {
-        if (data.hasOwnProperty(key)) {
-          if (data[key] instanceof File) {
-            formData.append(key, data[key])
-          } else {
-            formData.append(key, data[key])
-          }
+    if (Object.values(newControls).some(value => value)) {
+      // return
+    }
+
+    const formData = new FormData()
+
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        if (data[key] instanceof File) {
+          formData.append(key, data[key])
+        } else {
+          formData.append(key, data[key])
         }
       }
-
-      const requestOptions = {
-        method: 'POST',
-        body: formData
-      }
-
-      const response = await fetch(url, requestOptions)
-      const responseData = await response.json()
-
-      if (responseData.erreur) {
-        toast.error('Erreur !')
-      } else {
-        toast.success('Le profil a été modifié avec succès')
-      }
-    } catch (error) {
-      console.log('Erreur:', error)
     }
+
+    const requestOptions = {
+      method: 'POST',
+      body: formData
+    }
+
+    const response = await fetch(url, requestOptions)
+    const responseData = await response.json()
+
+    if (responseData.erreur) {
+      toast.error('Erreur !')
+    } else {
+      toast.success('Le profil a été modifié avec succès')
+    }
+
+    // } catch (error) {
+    //   console.log('Erreur:', error)
+    // }
   }
 
   return (
@@ -378,7 +385,7 @@ const AccountDetails = () => {
                 value={data?.nom_ut ?? ''}
                 className={`${controls?.nom_ut === true ? 'isReq' : ''}`}
                 onChange={(e: any) => {
-                  if (e.target?.value.trim() === '') {
+                  if (e.target?.value?.trim() === '') {
                     setControls({ ...controls, nom_ut: true })
                     setData((prev: any) => ({
                       ...prev,
@@ -437,8 +444,8 @@ const AccountDetails = () => {
                 className={`${controls?.email === true || controls.emailValid === true ? 'isReq' : ''}`}
                 onChange={(e: any) => {
                   const value = e.target.value
-                  const isEmpty = value.trim() === ''
-                  const isInvalid = mailCheck(value.trim())
+                  const isEmpty = value?.trim() === ''
+                  const isInvalid = mailCheck(value?.trim())
 
                   setData((prev: any) => ({ ...prev, email: value }))
                   setControls((prev: any) => ({
@@ -518,8 +525,8 @@ const AccountDetails = () => {
                   }}
                   onChange={(e: any) => {
                     const value = e.target.value
-                    const isEmpty = value.trim() === ''
-                    const isInvalid = tarifCheck(value.trim())
+                    const isEmpty = value?.trim() === ''
+                    const isInvalid = tarifCheck(value?.trim())
 
                     setData((prev: any) => ({ ...prev, tarif: value }))
                     setControls((prev: any) => ({
@@ -571,7 +578,7 @@ const AccountDetails = () => {
               </Grid>
             ) : null}
             {userData?.role === 2 || userData?.role === 3 ? (
-              <Grid item xs={data.role == 2 ? 6 : 12} md={data.role == 2 ? 6 : 12}>
+              <Grid item xs={userData?.role == 2 ? 6 : 12} md={userData?.role == 2 ? 6 : 12}>
                 <TextField
                   fullWidth
                   label='Adresse'
@@ -595,8 +602,8 @@ const AccountDetails = () => {
                   className={`${controls?.adresse === true || controls.addressValid === true ? 'isReq' : ''}`}
                   onChange={(e: any) => {
                     const value = e.target.value
-                    const isEmpty = value.trim() === ''
-                    const isInvalid = addressCheck(value.trim())
+                    const isEmpty = value?.trim() === ''
+                    const isInvalid = addressCheck(value?.trim())
 
                     setData((prev: any) => ({ ...prev, adresse: value }))
                     setControls((prev: any) => ({
@@ -626,7 +633,7 @@ const AccountDetails = () => {
                   className={`${controls?.heurD === true ? 'isReq' : ''}`}
                   value={data?.heurD ?? ''}
                   onChange={(e: any) => {
-                    if (e.target?.value.trim() === '') {
+                    if (e.target?.value?.trim() === '') {
                       setControls({ ...controls, heurD: true })
                       setData((prev: any) => ({
                         ...prev,
@@ -670,7 +677,7 @@ const AccountDetails = () => {
                   className={`${controls?.heurF === true ? 'isReq' : ''}`}
                   value={data?.heurF ?? ''}
                   onChange={(e: any) => {
-                    if (e.target?.value.trim() === '') {
+                    if (e.target?.value?.trim() === '') {
                       setControls({ ...controls, heurF: true })
                       setData((prev: any) => ({
                         ...prev,
@@ -744,8 +751,8 @@ const AccountDetails = () => {
                 }}
                 onChange={(e: any) => {
                   const value = e.target.value
-                  const isEmpty = compte[0]?.id !== 0 ? false : value.trim() === ''
-                  const isInvalid = passwordCheck(value.trim())
+                  const isEmpty = compte[0]?.id !== 0 ? false : value?.trim() === ''
+                  const isInvalid = passwordCheck(value?.trim())
 
                   setData((prev: any) => ({ ...prev, mdp: value }))
                   setControls((prev: any) => ({
@@ -802,8 +809,8 @@ const AccountDetails = () => {
                 }}
                 onChange={(e: any) => {
                   const value = e.target.value
-                  const isEmpty = value.trim() === ''
-                  const isInvalid = passwordCheck(value.trim())
+                  const isEmpty = value?.trim() === ''
+                  const isInvalid = passwordCheck(value?.trim())
 
                   setData((prev: any) => ({ ...prev, conMdp: value }))
                   setControls((prev: any) => ({

@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react'
 
-import Link from 'next/link'
-
 import IconButton from '@mui/material/IconButton'
 import classnames from 'classnames'
 
@@ -118,22 +116,22 @@ const NavbarContent = () => {
     }
   }
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      if (userData?.id) {
-        await getNotification(userData.id)
-      }
-    }
+  // useEffect(() => {
+  //   const fetchNotifications = async () => {
+  //     if (userData?.id) {
+  //       await getNotification(userData.id)
+  //     }
+  //   }
 
-    fetchNotifications()
-  }, [])
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      await getNotification(userData?.id)
-    }, 10000)
+  //   fetchNotifications()
+  // }, [])
+  // useEffect(() => {
+  //   const interval = setInterval(async () => {
+  //     await getNotification(userData?.id)
+  //   }, 10000)
 
-    return () => clearInterval(interval)
-  }, [])
+  //   return () => clearInterval(interval)
+  // }, [])
 
   return (
     <div

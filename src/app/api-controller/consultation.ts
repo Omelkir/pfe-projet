@@ -14,7 +14,7 @@ export const liste = async (req: any) => {
     const paramsObj = Object.fromEntries(urlParams.entries())
 
     const today = new Date().toISOString().split('T')[0] // format YYYY-MM-DD
-    let whereClause = `WHERE date >= '${today}' `
+    let whereClause = `WHERE consultation.date >= '${today}' `
     let currentPage = 1
     let itemsPerPage = 6
 

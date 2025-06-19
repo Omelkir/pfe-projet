@@ -142,7 +142,7 @@ export const modifier = async (req: any) => {
     hashedPassword = await bcrypt.hash(motDePasse, 10)
     const id = json.id
 
-    const sql = `UPDATE medi_connect.medecin SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',tarif='${json.tarif}',id_ville='${json.id_ville}',heurD='${json.heurD}',heurF='${json.heurF}',id_spe='${json.id_spe}',info='${json.info}',adresse='${json.adresse}',mdp='${hashedPassword} where id='${id}'`
+    const sql = `UPDATE medi_connect.medecin SET nom_ut ='${json.nom_ut}',email ='${json.email}',image='${checkUrl}',tarif='${json.tarif}',id_ville='${json.id_ville}',heurD='${json.heurD}',heurF='${json.heurF}',id_spe='${json.id_spe}',info='${json.info}',adresse='${json.adresse}',mdp='${hashedPassword}' where id='${id}'`
 
     await pool.query(sql)
 

@@ -109,7 +109,7 @@ export const reponse = async (req: any) => {
       service: 'gmail',
       auth: {
         user: 'mediconnect048@gmail.com',
-        pass: 'viau pxiq ietj gmoj'
+        pass: 'gkka ctir ardv fyea'
       }
     })
 

@@ -156,7 +156,7 @@ export const liste = async (req: any) => {
     let itemsPerPage = 6
 
     Object.keys(paramsObj).forEach((key, index) => {
-      if (paramsObj[key] && ['getall', 'page', 'limit', 'el', 'id_el'].indexOf(key) === -1) {
+      if (paramsObj[key] && ['getall', 'page', 'limit', 'el', 'id_el', 'archive'].indexOf(key) === -1) {
         whereClause += ` AND p.${key} = ${paramsObj[key]}`
       }
 
@@ -171,7 +171,7 @@ export const liste = async (req: any) => {
 
     const relationQuery =
       'el' in paramsObj && 'id_el' in paramsObj
-        ? ` and  r.el='${paramsObj['el']}' and r.id_el= '${paramsObj['id_el']}'AND r.archive = 0 `
+        ? ` and  r.el='${paramsObj['el']}' and r.id_el= '${paramsObj['id_el']}' AND r.archive = '${paramsObj['archive']}' `
         : ''
 
     const totalCountQuery = `SELECT COUNT(*) as count FROM medi_connect.patient p INNER JOIN relation_patient r ON r.id_patient = p.id ${whereClause} ${relationQuery}`
@@ -190,6 +190,8 @@ export const liste = async (req: any) => {
         ${itemsPerPage}
     OFFSET
         ${offset}`
+
+    console.log(sql)
 
     const [rows] = await pool.query(sql)
     const data: any = rows
