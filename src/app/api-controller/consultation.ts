@@ -89,8 +89,8 @@ export const ajouter = async (req: any) => {
   try {
     const json: any = req
 
-    await pool.query(`INSERT INTO medi_connect.consultation (id_el,el,date,id_patient, approuve, duree) 
-                       VALUES ('${json.id_el}','${json.el}','${json.date}', '${json.id_patient}', 1, '${json.duree}')`)
+    await pool.query(`INSERT INTO medi_connect.consultation (id_el,el,date,id_patient, approuve, duree,date_creation) 
+                       VALUES ('${json.id_el}','${json.el}','${json.date}', '${json.id_patient}', 1, '${json.duree}',CURDATE())`)
 
     return { erreur: false, data: true }
   } catch (error) {

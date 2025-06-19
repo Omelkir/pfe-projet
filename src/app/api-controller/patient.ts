@@ -87,7 +87,7 @@ export const ajouter = async (req: any) => {
 
     const sql = `
     INSERT INTO medi_connect.patient (
-      nom, prenom, email, mdp, role, image, id_ville, approuve, age, tel
+      nom, prenom, email, mdp, role, image, id_ville, approuve, age, tel,date
     ) VALUES (
       '${json.nom}',
       '${json.prenom}',
@@ -98,7 +98,8 @@ export const ajouter = async (req: any) => {
       '${json.id_ville}',
       '1',
       '${json.age}',
-      '${json.tel}'
+      '${json.tel}',
+      CURDATE()
     )
   `
 

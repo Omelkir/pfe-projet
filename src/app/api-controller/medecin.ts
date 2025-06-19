@@ -74,8 +74,8 @@ export const ajouter = async (req: any) => {
 
     const hashedPassword = await bcrypt.hash(motDePasse, 10)
 
-    const sql = `INSERT INTO medi_connect.medecin (nom_ut, email, mdp,role,image,tarif,id_ville,heurD,heurF,id_spe,info,approuve,adresse) 
-                       VALUES ('${json.nom_ut}', '${json.email}', '${hashedPassword}',2, '${req.checkUrl}', '${json.tarif}', '${json.id_ville}', '${json.heurD}', '${json.heurF}', '${json.id_spe}', '${json.info}','1','${json.adresse}')`
+    const sql = `INSERT INTO medi_connect.medecin (nom_ut, email, mdp,role,image,tarif,id_ville,heurD,heurF,id_spe,info,approuve,adresse,date) 
+                       VALUES ('${json.nom_ut}', '${json.email}', '${hashedPassword}',2, '${req.checkUrl}', '${json.tarif}', '${json.id_ville}', '${json.heurD}', '${json.heurF}', '${json.id_spe}', '${json.info}','1','${json.adresse}',CURDATE())`
 
     await pool.query(sql)
 
